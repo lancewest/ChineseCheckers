@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+</head>
+<body>
+
+<h1> </h1>
+
+<script>
+
+function go() { 
+
+	alert("YOU DID SOMETHING!");
+
+} // end go()
+
+function back() { 
+
+	window.location.href = 'IntroScreen.html';
+
+} // end back() 
+
+var numPlayers = $("#numPlayerSelect").val();
+var playerName = $("#playerNameInput").val();
+var gameplay = $("#gameplay").val();
+var timedSelect = $("#timed").val();
+
+</script>
+
+<table>
+<tr>
+  <td>Player Name:</td>
+  <td>
+      <form action="">
+      <input id = "playerNameInput" type="text" name="playerName"><br>
+      </form> 
+  </td>
+
+</tr>
+<tr>
+  <td>Number of Players:</td>
+  <td>
+       <form action="">
+       <select id="numPlayerSelect">
+       <option value="two">2</option>
+       <option value="three">3</option>
+       <option value="four">4</option>
+       <option value="six">6</option>
+       <option value="any">any</option>
+       </select>
+       </form>
+  </td>
+  
+</tr>
+<tr>
+  <td>Gameplay:</td>
+  <td>
+       <form action="">   
+       <select id="gameplay">
+       <option value="classic">Classic</option>
+       <option value="super">Super</option>
+       <option value="capture">Capture</option>
+       <option value="any">any</option>
+       </select>
+       </form>
+  </td>
+  
+</tr>
+<tr>
+  <td> Timed Play:</td>
+  <td> 
+       <form action="">
+       <select id="timed">
+       <option value="no">No</option>
+       <option value="yes">Yes</option>
+       <option value="any">any</option>
+       </select>
+       </form>
+  </td> 
+</tr>
+
+</table>
+
+<button type="button" onclick="go()">Continue</button>
+<button type="button" onclick="back()">Back</button>
+
+</body>
+</html>
