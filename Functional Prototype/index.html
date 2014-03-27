@@ -49,8 +49,8 @@ body {
   <input id="send" type="button" value="Send"></input>
 </div>
 
-<div id="game_section" align="center" class="canvasHolder">
-	<canvas id="testCanvas" width="1000" height ="1000"></canvas>
+<div id="game_section" align="center" class="canvasHolder" >
+		<canvas id="testCanvas" width="1000" height ="1000" text="Your Turn"></canvas>
 </div>
 
 <div id="waiting_section" align="center" >
@@ -107,6 +107,15 @@ body {
 	var othersMarbles = [];
 	var myMarbles = [];
 	var moveingFrom = [];
+	var myTurn = true;
+	var turnTracker = new createjs.Text("Your Turn!", "20px Arial", "#ff7700");
+	
+	var spotsInitialized = false;
+	var playersInitialized = 0;
+	
+	var spotContainer = new createjs.Container();
+	var myMarblesContainer = new createjs.Container();
+	var othersMarblesContainer = new createjs.Container();
 	
 	
 	
@@ -146,10 +155,23 @@ body {
 	// If recieve a start_game messege from the server do this: Proceed to game
     socket.on(
       'start_game',
-      function() {
+      function(message) {
         $('#waiting_section').css('display', 'none');
         $('#game_section').css('display', 'block');
         $('#status').text('Playing.');
+		
+		if(message == "your_turn")
+		{
+			turnTracker.text = "Your Turn!"
+			myTurn = true;
+			update = true;
+		}
+		else
+		{
+			turnTracker.text = "Opponent's Turn."
+			myTurn = false;
+			update = true;
+		}
       });
 
     // If a login_failed message is received, stay in the login section but
@@ -182,6 +204,19 @@ body {
 			marble.x = endSpot.screenX;
 			marble.y = endSpot.screenY;
 			update = true;
+			
+			turnTracker.text = "Your Turn!"
+			myTurn = true;
+        });
+		
+	// If server tells us that the other player has won:
+    socket.on(
+      'win',
+      function(winner) {
+			update = true;
+			
+			turnTracker.text = "Game Over! You Lose! " + winner + " wins!";
+			myTurn = false;
         });
 
     // When the Log In button is clicked, the provided function will be called,
@@ -227,7 +262,7 @@ body {
 		// enabled mouse over / out events
 		stage.enableMouseOver(10);
 		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
-
+		
 		//Load grey spot image
 		var spotImage = new Image();
 		spotImage.src = "assets/spot.png";
@@ -242,6 +277,10 @@ body {
 		var myMarbleImage = new Image();
 		myMarbleImage.src = "assets/bluemarble.png";
 		myMarbleImage.onload = handleMyMarbleImageLoad;
+		
+		stage.addChild(spotContainer);
+		stage.addChild(othersMarblesContainer);
+		stage.addChild(myMarblesContainer);
 	}
 
 	function stop() {
@@ -266,6 +305,9 @@ body {
 	
 	//Finds closest spot to screen-pixel coordinates
 	function findClosestSpot(screenX, screenY) {
+		if(!spotsInitialized)
+			return null;
+		
 		var shortestDistance = 10000;
 		var closest;
 	
@@ -286,13 +328,121 @@ body {
 		return closest;
 	}
 	
+	//Takes a start spot and recursivelly finds all possible move locations
+	function getValidMoves(startSpot, cameFrom) {
+		var possibleMoves = [ ];
+		possibleMoves.push(startSpot);
+		
+		//Check if can continue jumping to the northeast
+		if(cameFrom != "northeast" 
+			&& startSpot.northeast != null 
+			&& !startSpot.northeast.isEmpty 
+			&& startSpot.northeast.northeast != null 
+			&& startSpot.northeast.northeast.isEmpty) {
+				possibleMoves = possibleMoves.concat( getValidMoves(startSpot.northeast.northeast, "southwest") );
+		}
+		//Check if can continue jumping to the east
+		if(cameFrom != "east" 
+			&& startSpot.east != null 
+			&& !startSpot.east.isEmpty 
+			&& startSpot.east.east != null 
+			&& startSpot.east.east.isEmpty) {
+				possibleMoves = possibleMoves.concat( getValidMoves(startSpot.east.east, "west") );
+		}
+		//Check if can continue jumping to the southeast
+		if(cameFrom != "southeast" 
+			&& startSpot.southeast != null 
+			&& !startSpot.southeast.isEmpty 
+			&& startSpot.southeast.southeast != null 
+			&& startSpot.southeast.southeast.isEmpty) {
+				possibleMoves = possibleMoves.concat( getValidMoves(startSpot.southeast.southeast, "northwest") );
+		}
+		//Check if can continue jumping to the southwest
+		if(cameFrom != "southwest" 
+			&& startSpot.southwest != null 
+			&& !startSpot.southwest.isEmpty 
+			&& startSpot.southwest.southwest != null 
+			&& startSpot.southwest.southwest.isEmpty) {
+				possibleMoves = possibleMoves.concat( getValidMoves(startSpot.southwest.southwest, "northeast") );
+		}
+		//Check if can continue jumping to the west
+		if(cameFrom != "west" 
+			&& startSpot.west != null 
+			&& !startSpot.west.isEmpty 
+			&& startSpot.west.west != null 
+			&& startSpot.west.west.isEmpty) {
+				possibleMoves = possibleMoves.concat( getValidMoves(startSpot.west.west, "east") );
+		}
+		//Check if can continue jumping to the northwest
+		if(cameFrom != "northwest" 
+			&& startSpot.northwest != null 
+			&& !startSpot.northwest.isEmpty 
+			&& startSpot.northwest.northwest != null 
+			&& startSpot.northwest.northwest.isEmpty) {
+				possibleMoves = possibleMoves.concat( getValidMoves(startSpot.northwest.northwest, "southeast") );
+		}
+		
+		return possibleMoves;
+	}
+	
 	//checks the screen-pixel coordinates given to see if they are a valid move
 	function isValidMove(startX, startY, endX, endY) {
 		var start = findClosestSpot(startX, startY);
 		var end = findClosestSpot(endX, endY);
 		
-		if( (start.northeast == end || start.east == end || start.southeast == end ||
-			start.southwest == end || start.west == end || start.northwest == end) && end.isEmpty == true)
+		var possibleMoves = [ ];
+		
+		//Check if we can move or jump to the northeast
+		if(start.northeast != null && start.northeast.isEmpty)
+			possibleMoves.push(start.northeast);
+		else if(start.northeast != null && start.northeast.northeast != null && start.northeast.northeast.isEmpty)
+		{
+			possibleMoves = possibleMoves.concat( getValidMoves(start.northeast.northeast, "southwest") );
+		}
+
+		//Check if we can move or jump to the east
+		if(start.east != null && start.east.isEmpty)
+			possibleMoves.push(start.east);
+		else if(start.east != null && start.east.east != null && start.east.east.isEmpty)
+		{
+			possibleMoves = possibleMoves.concat( getValidMoves(start.east.east, "west") );
+		}
+		
+		//Check if we can move or jump to the southeast
+		if(start.southeast != null && start.southeast.isEmpty)
+			possibleMoves.push(start.southeast);
+		else if(start.southeast != null && start.southeast.southeast != null && start.southeast.southeast.isEmpty)
+		{
+			possibleMoves = possibleMoves.concat( getValidMoves(start.southeast.southeast, "northwest") );
+		}
+		
+		//Check if we can move or jump to the southwest
+		if(start.southwest != null && start.southwest.isEmpty)
+			possibleMoves.push(start.southwest);
+		else if(start.southwest != null && start.southwest.southwest != null && start.southwest.southwest.isEmpty)
+		{
+			possibleMoves = possibleMoves.concat( getValidMoves(start.southwest.southwest, "northeast") );
+		}
+		
+		//Check if we can move or jump to the west
+		if(start.west != null && start.west.isEmpty)
+			possibleMoves.push(start.west);
+		else if(start.west != null && start.west.west != null && start.west.west.isEmpty)
+		{
+			possibleMoves = possibleMoves.concat( getValidMoves(start.west.west, "east") );
+		}
+		
+		//Check if we can move or jump to the northwest
+		if(start.northwest != null && start.northwest.isEmpty)
+			possibleMoves.push(start.northwest);
+		else if(start.northwest != null && start.northwest.northwest != null && start.northwest.northwest.isEmpty)
+		{
+			possibleMoves = possibleMoves.concat( getValidMoves(start.northwest.northwest, "southeast") );
+		}
+		
+		
+		//Check list of possible moves to see if our end is in it
+		if( possibleMoves.indexOf(end) > -1 )
 			return true;
 		else
 			return false;
@@ -354,19 +504,36 @@ body {
 	
 	//After the spots are initialized, go and mark the starting positions as occupied
 	function markOccupiedSpots() {
+		if(!spotsInitialized || playersInitialized < 2)
+			return null;
+	
 		for(var i = 0; i<10; i++) {
 			findClosestSpot(myMarbles[i].x, myMarbles[i].y).isEmpty = false;
 			findClosestSpot(othersMarbles[i].x, othersMarbles[i].y).isEmpty = false;
 		}
 	}
 
+	//Check to see if this client has won
+	function hasWon() {
+		for(var i = 0; i < 10; i++) {
+			if( findClosestSpot(myMarbles[i].x, myMarbles[i].y).home != true )
+				return false;
+		}
+		
+		return true;
+	}
+	
 	//This function is called when the grey spot image is loaded. It positions the empty spots and initializes the matrix that holds them and the links between them
 	function handleSpotImageLoad(event) {
 
 		var image = event.target;
 		var bitmap;
-		var container = new createjs.Container();
-		stage.addChild(container);
+		
+		//Set Up Turn Tracker Text
+		turnTracker.x = 100; 
+		turnTracker.y = 100; 
+		turnTracker.textBaseline = "alphabetic";
+		spotContainer.addChild(turnTracker);
 			
 		var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
 
@@ -376,7 +543,7 @@ body {
 			var startPointX = 500-(((spotsPerLine[y]-1)/2)*50);
 			for(var x = 0; x < spotsPerLine[y]; x++){
 				bitmap = new createjs.Bitmap(image);
-				container.addChild(bitmap);
+				spotContainer.addChild(bitmap);
 				bitmap.regX = bitmap.image.width/2|0;
 				bitmap.regY = bitmap.image.height/2|0;
 				bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.6;
@@ -390,6 +557,7 @@ body {
 				spot.y = y;
 				spot.screenX = bitmap.x;
 				spot.screenY = bitmap.y;
+				spot.northeast = spot.east = spot.southeast = spot.southwest = spot.west = spot.northwest = null;
 				if(y<4)
 					spot.home = true;
 				else
@@ -405,6 +573,7 @@ body {
 		}
 		
 		setUpSpotLinks();
+		spotsInitialized = true;
 		markOccupiedSpots();
 	}
 	
@@ -413,8 +582,6 @@ body {
 		myMarbles = new Array(10);
 		var image = event.target;
 		var bitmap;
-		var container = new createjs.Container();
-		stage.addChild(container);
 
 		//list of starting positions
 		var xPositions = [425,475,525,575,450,500,550,475,525,500];
@@ -423,7 +590,7 @@ body {
 		// Create marbles and initial settings/positions
 		for(var i = 0; i < 10; i++){
 			bitmap = new createjs.Bitmap(image);
-			container.addChild(bitmap);
+			myMarblesContainer.addChild(bitmap);
 			bitmap.x = xPositions[i];
 			bitmap.y = yPositions[i];
 			bitmap.regX = bitmap.image.width/2|0;
@@ -433,64 +600,84 @@ body {
 			bitmap.cursor = "pointer";
 
 			//Mark occupied spots as not empty
-			findClosestSpot(bitmap.x, bitmap.y).isEmpty = false;
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
 			
 			//Add listener for mousedown that when triggered will enlargen if not allready and also take note of starting position
 			//Add listener for mouseup that when triggered will check to see if it is in a valid position. If marble is in valid position
 			// on the mouseup then it will be officially moved and the server will be notified
 			bitmap.addEventListener("mousedown", function(evt) {
 				evt.addEventListener("mouseup", function(evt) {
-					var o = evt.target;
-					o.scaleX = o.scaleY = 0.55;
-					update = true;
-					
-					if(isValidMove(moveingFrom.screenX, moveingFrom.screenY, o.x, o.y))
-					{
-						var startSpot = findClosestSpot(moveingFrom.screenX, moveingFrom.screenY);
-						var endSpot = findClosestSpot(o.x, o.y);
-						o.x = endSpot.screenX;
-						o.y = endSpot.screenY;
-						endSpot.isEmpty = false;
-						startSpot.isEmpty = true;
-						socket.emit('move', startSpot.x, startSpot.y, endSpot.x, endSpot.y);
-					}
-					else //Not valid move. Move marble back to where it was
-					{
-						o.x = moveingFrom.screenX;
-						o.y = moveingFrom.screenY;
+					if(myTurn) {
+						var o = evt.target;
+						o.scaleX = o.scaleY = 0.55;
+						update = true;
+						
+						if(isValidMove(moveingFrom.screenX, moveingFrom.screenY, o.x, o.y))
+						{
+							var startSpot = findClosestSpot(moveingFrom.screenX, moveingFrom.screenY);
+							var endSpot = findClosestSpot(o.x, o.y);
+							o.x = endSpot.screenX;
+							o.y = endSpot.screenY;
+							endSpot.isEmpty = false;
+							startSpot.isEmpty = true;
+							socket.emit('move', startSpot.x, startSpot.y, endSpot.x, endSpot.y);
+							turnTracker.text = "Opponenet's Turn."
+							myTurn = false;
+							
+							if(hasWon())
+							{
+								turnTracker.text = "You Win!"
+								socket.emit('win');
+							}
+						}
+						else //Not valid move. Move marble back to where it was
+						{
+							o.x = moveingFrom.screenX;
+							o.y = moveingFrom.screenY;
+						}
 					}
 				});
 				
-				// bump the target in front of its siblings:
-				var o = evt.target;
-				o.scaleX = o.scaleY = 0.65;
-				o.parent.addChild(o);
-				o.offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
-				
-				moveingFrom.screenX = o.x;
-				moveingFrom.screenY = o.y;
+				if(myTurn) {
+					// bump the target in front of its siblings:
+					var o = evt.target;
+					o.scaleX = o.scaleY = 0.65;
+					o.parent.addChild(o);
+					o.offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
+					
+					moveingFrom.screenX = o.x;
+					moveingFrom.screenY = o.y;
+				}
 			});
 			
 			// the pressmove event is dispatched when the mouse moves after a mousedown on the target until the mouse is released.
 			bitmap.addEventListener("pressmove", function(evt) {
-				var o = evt.target;
-				o.x = evt.stageX+ o.offset.x;
-				o.y = evt.stageY+ o.offset.y;
-				update = true;
+				if(myTurn) {
+					var o = evt.target;
+					o.x = evt.stageX+ o.offset.x;
+					o.y = evt.stageY+ o.offset.y;
+					update = true;
+				}
 			});
 			
 			//Add listener for rollover to enlarge marble when it is hovered over
 			bitmap.addEventListener("rollover", function(evt) {
-				var o = evt.target;
-				o.scaleX = o.scaleY = 0.65;
-				update = true;
+				if(myTurn) {
+					var o = evt.target;
+					o.scaleX = o.scaleY = 0.65;
+					update = true;
+				}
 			});
 			
 			//Add listener for rollout to re-shrink marble when it is not hovered over
 			bitmap.addEventListener("rollout", function(evt) {
-				var o = evt.target;
-				o.scaleX = o.scaleY = o.scale;
-				update = true;
+				if(myTurn) {
+					var o = evt.target;
+					o.scaleX = o.scaleY = o.scale;
+					update = true;
+				}
 			});
 			
 			myMarbles[i] = bitmap;
@@ -498,6 +685,7 @@ body {
 
 		document.getElementById("loader").className = "";
 		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
 	}
 	
 	//This function is run when the redmarble image is loaded. It places all the opponents marbles on the board
@@ -505,8 +693,7 @@ body {
 		othersMarbles = new Array(10);
 		var image = event.target;
 		var bitmap;
-		var container = new createjs.Container();
-		stage.addChild(container);
+		
 
 		var xPositions = [500,475,525,450,500,550,425,475,525,575];
 		var yPositions = [50,100,100,150,150,150,200,200,200,200];
@@ -514,7 +701,7 @@ body {
 		for(var i = 0; i < 10; i++){
 			//Set up the immage settings
 			bitmap = new createjs.Bitmap(image);
-			container.addChild(bitmap);
+			othersMarblesContainer.addChild(bitmap);
 			bitmap.x = xPositions[i];
 			bitmap.y = yPositions[i];
 			bitmap.regX = bitmap.image.width/2|0;
@@ -526,11 +713,14 @@ body {
 			othersMarbles[i] = bitmap;
 			
 			//Mark occupied spots as not empty
-			findClosestSpot(bitmap.x, bitmap.y).isEmpty = false;
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
 		}
 
 		document.getElementById("loader").className = "";
 		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
 	}
 
 	function tick(event) {

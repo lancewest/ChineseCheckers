@@ -32,8 +32,8 @@ io.sockets.on(
 				
 					//When there are 2 Clients Waiting, start a game
 					if(players.length%2 == 0) {
-						players[players.length-1].emit('start_game');
-						players[players.length-2].emit('start_game');
+						players[players.length-1].emit('start_game', "your_turn");
+						players[players.length-2].emit('start_game', "opponents_turn");
 					}
 					return;
 				}
@@ -48,6 +48,14 @@ io.sockets.on(
     'move',
     function(startX, startY, endX, endY) {
         client.broadcast.emit('move', startX, startY, endX, endY);
+    });
+	
+	// Listen to an event called 'win'. The client should emit this event when
+	// it has won and then the server will pass it on to the other clients
+	client.on(
+    'win',
+    function(startX, startY, endX, endY) {
+        client.broadcast.emit('win', client.user_name);
     });
 });
 
