@@ -22,21 +22,12 @@ io.sockets.on(
 		// it wants to log in to the chat room.
 		client.on(
 			'login',
-<<<<<<< HEAD
 			function(name) {
 				// This function extracts the user name from the login message, stores
 				// it to the client object, sends a login_ok message to the client
 				if (name != null) {
 					players.push(client);
 					client.user_name = name;
-=======
-			function(message) {
-				// This function extracts the user name from the login message, stores
-				// it to the client object, sends a login_ok message to the client
-				if (message && message.user_name) {
-					players.push(client);
-					client.set('user_name', message.user_name);
->>>>>>> FETCH_HEAD
 					client.emit('login_ok');
 				
 					//When there are 2 Clients Waiting, start a game
