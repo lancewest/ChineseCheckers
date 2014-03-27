@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<svg width="30" height="30" 
+     viewPort="0 0 120 120" version="1.1"
+     xmlns="http://www.w3.org/2000/svg">
+
+    <circle cx="15" cy="15" r="15" fill="orange"/>
+
+</svg>
