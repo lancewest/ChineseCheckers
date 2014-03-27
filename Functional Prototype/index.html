@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<!-- This section below lays out the format of everything. 
+		To add buttons or text, first you need to add something here to the appropriate section: -->
+<style>
+body {
+  font-family: sans-serif;
+  background: white;
+}
+
+#status {
+  font-size: 14pt;
+  color: gray;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+#login_section, #chat_section, #game_section, #waiting_section {
+  display: none;
+}
+
+.user_name {
+  font-size: 10pt;
+  font-weight: bold;
+  color: blue;
+}
+
+.testCanvas {
+  width: 960;
+  height: 800;
+}
+</style>
+
+<script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+<div id="login_section">
+  <div id="status">Connecting to the chat room ...</div>
+  Your name:
+  <input id="name" type="text"></input>
+  <input id="login" type="button" value="Play" disabled="true"></input>
+</div>
+
+<div id="chat_section">
+  <div id="board">
+  </div>
+  <input id="msg" type="text"></input>
+  <input id="send" type="button" value="Send"></input>
+</div>
+
+<div id="game_section" align="center" class="canvasHolder" >
+		<canvas id="testCanvas" width="1000" height ="1000" text="Your Turn"></canvas>
+</div>
+
+<div id="waiting_section" align="center" >
+	Waiting For Other Player
+</div>
+
+
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Chinese Checkers</title>
+
+	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+
+	<!-- Note: All core EaselJS classes are included here: Not actually all needed, clean up later --> 
+	<script type="text/javascript" src="./src/createjs/events/Event.js"></script>
+	<script type="text/javascript" src="./src/createjs/events/EventDispatcher.js"></script>
+	<script type="text/javascript" src="./src/createjs/utils/IndexOf.js"></script>
+	<script type="text/javascript" src="./src/easeljs/utils/UID.js"></script>
+	<script type="text/javascript" src="./src/easeljs/utils/Ticker.js"></script>
+	<script type="text/javascript" src="./src/easeljs/geom/Matrix2D.js"></script>
+	<script type="text/javascript" src="./src/easeljs/geom/Point.js"></script>
+	<script type="text/javascript" src="./src/easeljs/geom/Rectangle.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Shadow.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/SpriteSheet.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Graphics.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/DisplayObject.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Container.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Stage.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Bitmap.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Sprite.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/BitmapAnimation.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/BitmapText.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Shape.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/Text.js"></script>
+	<script type="text/javascript" src="./src/easeljs/display/DOMElement.js"></script>
+	<script type="text/javascript" src="./src/easeljs/events/MouseEvent.js"></script>
+	<script type="text/javascript" src="./src/easeljs/filters/Filter.js"></script>
+	<script type="text/javascript" src="./src/easeljs/ui/ButtonHelper.js"></script>
+	<script type="text/javascript" src="./src/easeljs/ui/Touch.js"></script>
+	<script type="text/javascript" src="./src/easeljs/utils/SpriteSheetUtils.js"></script>
+	<script type="text/javascript" src="./src/easeljs/utils/SpriteSheetBuilder.js"></script>
+
+	<script type="text/javascript" src="./client.js"></script>
+
+</head>
+
+<body background="white" onload="init();">
+
+	<div id="loader"></div>
+	
+</body>
+</html>
