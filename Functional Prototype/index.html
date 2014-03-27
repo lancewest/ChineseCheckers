@@ -1,6 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
+<!-- This section below lays out the format of everything. 
+		To add buttons or text, first you need to add something here to the appropriate section: -->
 <style>
 body {
   font-family: sans-serif;
@@ -14,26 +16,6 @@ body {
   margin-bottom: 12px;
 }
 
-#board {
-  width: 800px;
-  height: 600px;
-  border: 1px solid gray;
-  padding: 3px;
-}
-
-#board div {
-  margin-top: 5px;
-}
-
-#msg {
-  width: 740px;
-  margin-right: 10px;
-}
-
-#send {
-  width: 50px;
-}
-
 #login_section, #chat_section, #game_section, #waiting_section {
   display: none;
 }
@@ -42,20 +24,6 @@ body {
   font-size: 10pt;
   font-weight: bold;
   color: blue;
-}
-
-.says {
-  font-size: 10pt;
-  color: gray;
-}
-
-.msg {
-  font-size: 12pt;
-  font-family: serif;
-}
-
-.notification {
-  color: green;
 }
 
 .testCanvas {
@@ -97,7 +65,7 @@ body {
 
 	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
 
-	<!-- Note: All core EaselJS classes are listed here: -->
+	<!-- Note: All core EaselJS classes are included here: Not actually all needed, clean up later --> 
 	<script type="text/javascript" src="./src/createjs/events/Event.js"></script>
 	<script type="text/javascript" src="./src/createjs/events/EventDispatcher.js"></script>
 	<script type="text/javascript" src="./src/createjs/utils/IndexOf.js"></script>
@@ -126,9 +94,6 @@ body {
 	<script type="text/javascript" src="./src/easeljs/utils/SpriteSheetUtils.js"></script>
 	<script type="text/javascript" src="./src/easeljs/utils/SpriteSheetBuilder.js"></script>
 
-	<!-- We also provide hosted minified versions of all CreateJS libraries.
-	  http://code.createjs.com -->
-
 	<script>
 
 	var socket;
@@ -140,13 +105,13 @@ body {
 	var update = true;
 	var spotMatrix = [];
 	var othersMarbles = [];
+	var myMarbles = [];
 	var moveingFrom = [];
 	
 	
 	
 	
-	
-	// $(document) returns a jQuery object representing the whole document (page).
+  // $(document) returns a jQuery object representing the whole document (page).
   // $(document).ready(fn) tells jQuery to call function 'fn' after the whole
   // document is loaded.
   $(document).ready(function() {
@@ -160,8 +125,8 @@ body {
     // document.location.host returns the host of the current page.
     socket = io.connect('http://' + document.location.host);
 
-    // If a welcome message is received, it means the chat room is available.
-    // The Log In button will be then enabled.
+    // If a welcome message is received from server, display welcome message and
+    // the Log In button will be then enabled.
     socket.on(
       'welcome',
       function(message) {
@@ -169,7 +134,7 @@ body {
         $('#login').attr('disabled', false);
       });
 
-    // If a login_ok message is received, proceed to the chat section.
+    // If a login_ok message is received, proceed to the waiting section.
     socket.on(
       'login_ok',
       function() {
@@ -178,7 +143,7 @@ body {
         $('#status').text('Waiting.');
       });
 	  
-	// display an error message.
+	// If recieve a start_game messege from the server do this: Proceed to game
     socket.on(
       'start_game',
       function() {
@@ -195,33 +160,17 @@ body {
         $('#status').text('Failed to log in!');
       });
 
-    // If a chat message is received, display it.
-    socket.on(
-      'chat',
-      function(message) {
-        if (message && message.user_name && message.msg) {
-          var user_name = message.user_name;
-          var msg = message.msg;
-          // This will create a div element using the HTML code:
-          var div = $('<div></div>');
-          // Similarly, create span elements with CSS classes and corresponding
-          // contents, and append them in a row to the new div element.
-          div.append($('<span></span>').addClass('user_name').text(user_name));
-          div.append($('<span></span>').addClass('says').text(' says: '));
-          div.append($('<span></span>').addClass('msg').text(msg));
-          // Add the new div element to the chat board.
-          $('#board').append(div);
-        }
-      });
 	  
-	// If other player moves
+	// If server tells us that the other player moves do this:
     socket.on(
       'move',
       function(startX, startY, endX, endY) {
-			convertedStartX = startX + 2*(4-startX);
-			convertedStartY = startY + 2*(4-startY);
-			convertedEndX = endX + 2*(4-endX);
-			convertedEndY = endY + 2*(4-endY);
+			var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
+	  
+			convertedStartX = startX + 2*((spotsPerLine[startY]-1)/2 - startX);
+			convertedStartY = startY + 2*(8-startY);
+			convertedEndX = endX + 2*((spotsPerLine[endY]-1)/2 - endX);
+			convertedEndY = endY + 2*(8-endY);
 			
 			var startSpot = spotMatrix[convertedStartY][convertedStartX];
 			var endSpot = spotMatrix[convertedEndY][convertedEndX];
@@ -234,19 +183,6 @@ body {
 			marble.y = endSpot.screenY;
 			update = true;
         });
-	  
-
-    // If a notification is received, display it.
-    socket.on(
-      'notification',
-      function(message) {
-        if (message) {
-          // Similar to the handler of 'chat' event ...
-          var div = $('<div></div>');
-          div.append($('<span></span>').addClass('notification').text(message));
-          $('#board').append(div);
-        }
-      });
 
     // When the Log In button is clicked, the provided function will be called,
     // which sends a login message to the server.
@@ -270,34 +206,10 @@ body {
       }
     });
 
-    // When the Log In button is clicked, the provided function will be called,
-    // which sends a chat message to the server.
-    $('#send').click(function() {
-      var data = $('#msg').val();
-      if (data) {
-        data = data.trim();
-        if (data.length > 0) {
-          socket.emit('chat', { msg: data });
-        }
-      }
-      // Clear the input field.
-      $('#msg').val('');
-    });
-
-    // When Enter is pressed in the message field, it should be treated as
-    // clicking on the Send button.
-    $('#msg').keyup(function(event) {
-      if (event.keyCode == 13) {
-        $('#send').click();
-      }
-    });
   });
 	
 	
-	
-	
-	
-	
+	//Called to initialize the board when a client connects
 	function init() {
 		if (window.top != window) {
 			document.getElementById("header").style.display = "none";
@@ -305,9 +217,6 @@ body {
 		document.getElementById("loader").className = "loader";
 		// create stage and point it to the canvas:
 		canvas = document.getElementById("testCanvas");
-		
-		
-		
 
 		//check to see if we are running in a browser with touch support
 		stage = new createjs.Stage(canvas);
@@ -319,16 +228,17 @@ body {
 		stage.enableMouseOver(10);
 		stage.mouseMoveOutside = true; // keep tracking the mouse even when it leaves the canvas
 
+		//Load grey spot image
 		var spotImage = new Image();
 		spotImage.src = "assets/spot.png";
 		spotImage.onload = handleSpotImageLoad;
 		
-		// load the source image:
+		// load the red marble image:
 		var othersMarbleImage = new Image();
 		othersMarbleImage.src = "assets/redmarble.png";
 		othersMarbleImage.onload = handleOthersMarbleImageLoad;
 		
-		// load the source image:
+		// load the blue marble image image:
 		var myMarbleImage = new Image();
 		myMarbleImage.src = "assets/bluemarble.png";
 		myMarbleImage.onload = handleMyMarbleImageLoad;
@@ -338,11 +248,12 @@ body {
 		createjs.Ticker.removeEventListener("tick", tick);
 	}
 	
+	//Finds closes opponent marble to screen-pixel coordinates
 	function findClosestOpponentMarble(screenX, screenY) {
 		var shortestDistance = 10000;
 		var closest;
 	
-		for(var i = 0; i<9; i++) {
+		for(var i = 0; i<10; i++) {
 			var distance = Math.sqrt(((screenX - othersMarbles[i].x)*(screenX - othersMarbles[i].x)) + 
 							((screenY - othersMarbles[i].y)*(screenY - othersMarbles[i].y)));
 			if(distance < shortestDistance) {
@@ -353,17 +264,21 @@ body {
 		return closest;
 	}
 	
-	function findClosestSpot(x, y) {
+	//Finds closest spot to screen-pixel coordinates
+	function findClosestSpot(screenX, screenY) {
 		var shortestDistance = 10000;
 		var closest;
 	
-		for(var i = 0; i<9; i++) {
-			for(var j = 0; j<9; j++) {
-				var distance = Math.sqrt(((x - spotMatrix[j][i].screenX)*(x - spotMatrix[j][i].screenX)) + 
-								((y - spotMatrix[j][i].screenY)*(y - spotMatrix[j][i].screenY)));
+		var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
+	
+		for(var y = 0; y<17; y++) {
+			for(var x = 0; x<spotsPerLine[y]; x++) {
+
+				var distance = Math.sqrt(((screenX - spotMatrix[y][x].screenX)*(screenX - spotMatrix[y][x].screenX)) + 
+								((screenY - spotMatrix[y][x].screenY)*(screenY - spotMatrix[y][x].screenY)));
 				if(distance < shortestDistance) {
 					shortestDistance = distance;
-					closest = spotMatrix[j][i];
+					closest = spotMatrix[y][x];
 				}
 			}
 		}
@@ -371,30 +286,95 @@ body {
 		return closest;
 	}
 	
+	//checks the screen-pixel coordinates given to see if they are a valid move
 	function isValidMove(startX, startY, endX, endY) {
 		var start = findClosestSpot(startX, startY);
 		var end = findClosestSpot(endX, endY);
 		
-		if( Math.abs(start.x-end.x) <= 1 && Math.abs(start.y-end.y) <= 1 && end.isEmpty == true)
+		if( (start.northeast == end || start.east == end || start.southeast == end ||
+			start.southwest == end || start.west == end || start.northwest == end) && end.isEmpty == true)
 			return true;
 		else
 			return false;
 	}
+	
+	//Returns array of all neighboring spots
+	function getNeighboreSpots(spot) {
+		var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
+		var neighbores = [];
+	
+		for(var y = 0; y < 17; y++){
+			for(var x = 0; x < spotsPerLine[y]; x++){
+				var distance = Math.sqrt(((spot.screenX - spotMatrix[y][x].screenX)*(spot.screenX - spotMatrix[y][x].screenX)) + 
+								((spot.screenY - spotMatrix[y][x].screenY)*(spot.screenY - spotMatrix[y][x].screenY)));
+				if(distance < 60 && (x!=spot.x || y!=spot.y))
+					neighbores.push(spotMatrix[y][x]);
+			}
+		}
+		
+		return neighbores;
+	}
+	
+	//Link spots to their neighbores which are legal moves
+	function setUpSpotLinks() {
+	
+		var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
+	
+		for(var y = 0; y < 17; y++){
+			for(var x = 0; x < spotsPerLine[y]; x++){
+				var neighbores = getNeighboreSpots(spotMatrix[y][x]);
+				if(neighbores.length > 6 || neighbores.length < 2)
+					console.debug("Linking Neighbores Length Error:" + neighbores.length);
+				
+				for(var i = 0; i<neighbores.length; i++) {
+					if(neighbores[i].screenX > spotMatrix[y][x].screenX && neighbores[i].screenY < spotMatrix[y][x].screenY) { //Northeast
+						spotMatrix[y][x].northeast = neighbores[i];
+					}
+					else if(neighbores[i].screenX > spotMatrix[y][x].screenX && neighbores[i].screenY == spotMatrix[y][x].screenY) { //East
+						spotMatrix[y][x].east = neighbores[i];
+					}
+					else if(neighbores[i].screenX > spotMatrix[y][x].screenX && neighbores[i].screenY > spotMatrix[y][x].screenY) { //Southeast
+						spotMatrix[y][x].southeast = neighbores[i];
+					}
+					else if(neighbores[i].screenX < spotMatrix[y][x].screenX && neighbores[i].screenY > spotMatrix[y][x].screenY) { //Southwest
+						spotMatrix[y][x].southwest = neighbores[i];
+					}
+					else if(neighbores[i].screenX < spotMatrix[y][x].screenX && neighbores[i].screenY == spotMatrix[y][x].screenY) { //West
+						spotMatrix[y][x].west = neighbores[i];
+					}
+					else if(neighbores[i].screenX < spotMatrix[y][x].screenX && neighbores[i].screenY < spotMatrix[y][x].screenY) { //Northwest
+						spotMatrix[y][x].northwest = neighbores[i];
+					}
+					else
+						console.debug("Spot Linking Error! No Direction For: From-(" + x + "," + y + ")  To-(" + neighbores[i].x + "," + neighbores[i].y + ")");
+				}
+			}
+		}
+	}
+	
+	//After the spots are initialized, go and mark the starting positions as occupied
+	function markOccupiedSpots() {
+		for(var i = 0; i<10; i++) {
+			findClosestSpot(myMarbles[i].x, myMarbles[i].y).isEmpty = false;
+			findClosestSpot(othersMarbles[i].x, othersMarbles[i].y).isEmpty = false;
+		}
+	}
 
+	//This function is called when the grey spot image is loaded. It positions the empty spots and initializes the matrix that holds them and the links between them
 	function handleSpotImageLoad(event) {
-		spotMatrix = new Array(17);
+
 		var image = event.target;
 		var bitmap;
 		var container = new createjs.Container();
 		stage.addChild(container);
 			
-		var perLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
+		var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
 
-		// create and populate the screen with random daisies:
+		// create and are position the grey spots
 		for(var y = 0; y < 17; y++){
-			spotMatrix[y] = new Array(perLine[y]);
-			var startPointX = 500-(((perLine[y]-1)/2)*50);
-			for(var x = 0; x < perLine[y]; x++){
+			spotMatrix[y] = new Array(spotsPerLine[y]);
+			var startPointX = 500-(((spotsPerLine[y]-1)/2)*50);
+			for(var x = 0; x < spotsPerLine[y]; x++){
 				bitmap = new createjs.Bitmap(image);
 				container.addChild(bitmap);
 				bitmap.regX = bitmap.image.width/2|0;
@@ -410,6 +390,11 @@ body {
 				spot.y = y;
 				spot.screenX = bitmap.x;
 				spot.screenY = bitmap.y;
+				if(y<4)
+					spot.home = true;
+				else
+					spot.home = false;
+				
 				spotMatrix[y][x] = spot;
 				
 				startPointX += 50;
@@ -418,32 +403,41 @@ body {
 			document.getElementById("loader").className = "";
 			createjs.Ticker.addEventListener("tick", tick);
 		}
+		
+		setUpSpotLinks();
+		markOccupiedSpots();
 	}
 	
+	//This function is run when the bluemarble image is loaded and positions the blue marbles (this players marbles)
 	function handleMyMarbleImageLoad(event) {
+		myMarbles = new Array(10);
 		var image = event.target;
 		var bitmap;
 		var container = new createjs.Container();
 		stage.addChild(container);
 
-		var xPositions = [0,1,2,3,0,1,2,0,1,0];
-		var yPositions = [13,13,13,13,14,14,14,15,15,16];
+		//list of starting positions
+		var xPositions = [425,475,525,575,450,500,550,475,525,500];
+		var yPositions = [700,700,700,700,750,750,750,800,800,850];
 		
-		// create and populate the screen with random daisies:
-		for(var i = 0; i < 9; i++){
+		// Create marbles and initial settings/positions
+		for(var i = 0; i < 10; i++){
 			bitmap = new createjs.Bitmap(image);
 			container.addChild(bitmap);
-			console.debug("xPos:" + xPositions[i] + "  yPos:" + yPositions[i] + "    Spot:" + spotMatrix[yPositions[i]][xPositions[i]]);
-			bitmap.x = spotMatrix[yPositions[i]][xPositions[i]].screenX;
-			bitmap.y = spotMatrix[yPositions[i]][xPositions[i]].screenY;
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
 			bitmap.regX = bitmap.image.width/2|0;
 			bitmap.regY = bitmap.image.height/2|0;
 			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
 			bitmap.name = "myMarble"+i;
 			bitmap.cursor = "pointer";
-			
-			findClosestSpot(bitmap.x, bitmap.y).isEmpty = false;
 
+			//Mark occupied spots as not empty
+			findClosestSpot(bitmap.x, bitmap.y).isEmpty = false;
+			
+			//Add listener for mousedown that when triggered will enlargen if not allready and also take note of starting position
+			//Add listener for mouseup that when triggered will check to see if it is in a valid position. If marble is in valid position
+			// on the mouseup then it will be officially moved and the server will be notified
 			bitmap.addEventListener("mousedown", function(evt) {
 				evt.addEventListener("mouseup", function(evt) {
 					var o = evt.target;
@@ -460,7 +454,7 @@ body {
 						startSpot.isEmpty = true;
 						socket.emit('move', startSpot.x, startSpot.y, endSpot.x, endSpot.y);
 					}
-					else
+					else //Not valid move. Move marble back to where it was
 					{
 						o.x = moveingFrom.screenX;
 						o.y = moveingFrom.screenY;
@@ -473,7 +467,6 @@ body {
 				o.parent.addChild(o);
 				o.offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
 				
-				
 				moveingFrom.screenX = o.x;
 				moveingFrom.screenY = o.y;
 			});
@@ -483,52 +476,56 @@ body {
 				var o = evt.target;
 				o.x = evt.stageX+ o.offset.x;
 				o.y = evt.stageY+ o.offset.y;
-				// indicate that the stage should be updated on the next tick:
 				update = true;
 			});
 			
+			//Add listener for rollover to enlarge marble when it is hovered over
 			bitmap.addEventListener("rollover", function(evt) {
 				var o = evt.target;
 				o.scaleX = o.scaleY = 0.65;
 				update = true;
 			});
 			
+			//Add listener for rollout to re-shrink marble when it is not hovered over
 			bitmap.addEventListener("rollout", function(evt) {
 				var o = evt.target;
 				o.scaleX = o.scaleY = o.scale;
 				update = true;
 			});
-
+			
+			myMarbles[i] = bitmap;
 		}
 
 		document.getElementById("loader").className = "";
 		createjs.Ticker.addEventListener("tick", tick);
 	}
 	
+	//This function is run when the redmarble image is loaded. It places all the opponents marbles on the board
 	function handleOthersMarbleImageLoad(event) {
-		othersMarbles = new Array(9);
+		othersMarbles = new Array(10);
 		var image = event.target;
 		var bitmap;
 		var container = new createjs.Container();
 		stage.addChild(container);
 
-		// create and populate the screen with random daisies:
-		for(var i = 0; i < 9; i++){
+		var xPositions = [500,475,525,450,500,550,425,475,525,575];
+		var yPositions = [50,100,100,150,150,150,200,200,200,200];
+		
+		for(var i = 0; i < 10; i++){
+			//Set up the immage settings
 			bitmap = new createjs.Bitmap(image);
 			container.addChild(bitmap);
-			bitmap.x = (i+1)*50;
-			bitmap.y = 50;
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
 			bitmap.regX = bitmap.image.width/2|0;
 			bitmap.regY = bitmap.image.height/2|0;
 			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
 			bitmap.name = "othersMarble"+i;
 			bitmap.cursor = "pointer";
 			
-			//marble = new Object();
-			//marble.image = bitmap;
-			//marble.id = i;
 			othersMarbles[i] = bitmap;
 			
+			//Mark occupied spots as not empty
 			findClosestSpot(bitmap.x, bitmap.y).isEmpty = false;
 		}
 
@@ -550,13 +547,6 @@ body {
 <body background="white" onload="init();">
 
 	<div id="loader"></div>
-
-	<!--<header id="header" class="EaselJS">
-	//    <h1><span class="text-product">Easel<strong>JS</strong></span> Drag &amp; Drop Example With Custom Hit Areas</h1>
-	//    <p>This example is the same as the DragAndDrop example, except it uses <strong>hitArea</strong> to make only the center part of the daisy respond to mouse interactions.</p>
-	//</header>-->
-	
-	
 	
 </body>
 </html>
