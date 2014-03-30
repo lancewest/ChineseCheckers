@@ -54,7 +54,7 @@ var socket;
         $('#status').text('Waiting.');
       });
 	  
-	// If recieve a start_game messege from the server do this: Proceed to game
+	// If receive a start_game message from the server do this: Proceed to game
     socket.on(
       'start_game',
       function(message) {
@@ -172,13 +172,35 @@ var socket;
 		
 		// load the red marble image:
 		var othersMarbleImage = new Image();
-		othersMarbleImage.src = "assets/redmarble.png";
+		othersMarbleImage.src = "assets/redmarble.png"; // "assets/Rmarble.png"; 
 		othersMarbleImage.onload = handleOthersMarbleImageLoad;
 		
 		// load the blue marble image image:
 		var myMarbleImage = new Image();
-		myMarbleImage.src = "assets/bluemarble.png";
+		myMarbleImage.src = "assets/bluemarble.png"; // "assets/Bmarble.png"; 
 		myMarbleImage.onload = handleMyMarbleImageLoad;
+		
+	/*
+		// load the orange marble image:
+		var orangeMarble = new Image(); 
+		orangeMarble.src = "assets/Omarble.png"; 
+		orangeMarble.onload = handleOrangeMarble;
+		
+		// load the green marble image:
+		var greenMarble = new Image(); 
+		greenMarble.src = "assets/Gmarble.png"; 
+		greenMarble.onload = handleGreenMarble;
+	 
+		// load the yellow marble image:
+		var yellowMarble = new Image(); 
+		yellowMarble.src = "assets/Ymarble.png"; 
+		yellowMarble.onload = handleYellowMarble;
+	
+		// load the purple marble image: 
+		var purpleMarble = new Image(); 
+		purpleMarble.src = "assets/Pmarble.png"; 
+		purpleMarble.onload = handlePurpleMarble;
+	*/
 		
 		stage.addChild(spotContainer);
 		stage.addChild(othersMarblesContainer);
@@ -486,7 +508,7 @@ var socket;
 		markOccupiedSpots();
 	}
 	
-	//This function is run when the bluemarble image is loaded and positions the blue marbles (this players marbles)
+	//This function is run when the blue marble image is loaded and positions the blue marbles (this players marbles)
 	function handleMyMarbleImageLoad(event) {
 		myMarbles = new Array(10);
 		var image = event.target;
@@ -605,6 +627,210 @@ var socket;
 		createjs.Ticker.addEventListener("tick", tick);
 		playersInitialized++;
 	}
+	
+	// This function is run when the purple marble image is loaded.
+	function handlePurpleMarble(event) { 
+		purpleMarbles = new Array(10);
+		var image = event.target;
+		var bitmap;
+		
+		var xPositions = [350,300,250,200,325,275,225,300,250,275];
+		var yPositions = [650,650,650,650,600,600,600,550,550,500];
+		
+		for(var i = 0; i < 10; i++){
+			//Set up the image settings
+			bitmap = new createjs.Bitmap(image);
+			othersMarblesContainer.addChild(bitmap);
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
+			bitmap.regX = bitmap.image.width/2|0;
+			bitmap.regY = bitmap.image.height/2|0;
+			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
+			bitmap.name = "purpleMarble"+i;
+			bitmap.cursor = "pointer";
+			
+			purpleMarbles[i] = bitmap;
+			
+			//Mark occupied spots as not empty
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
+		}
+
+		document.getElementById("loader").className = "";
+		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
+	} 
+	
+	// This function is run when the green marble image is loaded. 
+	function handleGreenMarble(event) { 
+		greenMarbles = new Array(10);
+		var image = event.target;
+		var bitmap;
+		
+		var xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+		var yPositions = [250,250,250,250,300,300,300,350,350,400];
+		
+		for(var i = 0; i < 10; i++){
+			//Set up the image settings
+			bitmap = new createjs.Bitmap(image);
+			othersMarblesContainer.addChild(bitmap);
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
+			bitmap.regX = bitmap.image.width/2|0;
+			bitmap.regY = bitmap.image.height/2|0;
+			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
+			bitmap.name = "greenMarble"+i;
+			bitmap.cursor = "pointer";
+			
+			greenMarbles[i] = bitmap;
+			
+			//Mark occupied spots as not empty
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
+		}
+
+		document.getElementById("loader").className = "";
+		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
+	} 
+	
+	// This function is run when the orange marble image is loaded. 
+	function handleOrangeMarble(event) { 
+		orangeMarbles = new Array(10);
+		var image = event.target;
+		var bitmap;
+		
+		var xPositions = [350,300,250,200,325,275,225,300,250,275]; 
+		var yPositions = [250,250,250,250,300,300,300,350,350,400];
+		
+		for(var i = 0; i < 10; i++){
+			//Set up the image settings
+			bitmap = new createjs.Bitmap(image);
+			othersMarblesContainer.addChild(bitmap);
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
+			bitmap.regX = bitmap.image.width/2|0;
+			bitmap.regY = bitmap.image.height/2|0;
+			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
+			bitmap.name = "orangeMarble"+i;
+			bitmap.cursor = "pointer";
+			
+			orangeMarbles[i] = bitmap;
+			
+			//Mark occupied spots as not empty
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
+		}
+
+		document.getElementById("loader").className = "";
+		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
+	} 
+	
+	// This function is run when the yellow marble image is loaded. 
+	function handleYellowMarble(event) { 
+		yellowMarbles = new Array(10);
+		var image = event.target;
+		var bitmap;
+		
+		var xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+		var yPositions = [650,650,650,650,600,600,600,550,550,500];
+		
+		for(var i = 0; i < 10; i++){
+			//Set up the image settings
+			bitmap = new createjs.Bitmap(image);
+			othersMarblesContainer.addChild(bitmap);
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
+			bitmap.regX = bitmap.image.width/2|0;
+			bitmap.regY = bitmap.image.height/2|0;
+			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
+			bitmap.name = "yellowMarble"+i;
+			bitmap.cursor = "pointer";
+			
+			yellowMarbles[i] = bitmap;
+			
+			//Mark occupied spots as not empty
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
+		}
+
+		document.getElementById("loader").className = "";
+		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
+	} 
+	
+	// This function is run when the green marble image is loaded. 
+	function handleGreenMarble(event) { 
+		greenMarbles = new Array(10);
+		var image = event.target;
+		var bitmap;
+		
+		var xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+		var yPositions = [250,250,250,250,300,300,300,350,350,400];
+		
+		for(var i = 0; i < 10; i++){
+			//Set up the image settings
+			bitmap = new createjs.Bitmap(image);
+			othersMarblesContainer.addChild(bitmap);
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
+			bitmap.regX = bitmap.image.width/2|0;
+			bitmap.regY = bitmap.image.height/2|0;
+			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
+			bitmap.name = "greenMarble"+i;
+			bitmap.cursor = "pointer";
+			
+			greenMarbles[i] = bitmap;
+			
+			//Mark occupied spots as not empty
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
+		}
+
+		document.getElementById("loader").className = "";
+		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
+	} 
+	
+	// This function is run when the orange marble image is loaded. 
+	function handleOrangeMarble(event) { 
+		orangeMarbles = new Array(10);
+		var image = event.target;
+		var bitmap;
+		
+		var xPositions = [350,300,250,200,325,275,225,300,250,275]; 
+		var yPositions = [250,250,250,250,300,300,300,350,350,400];
+		
+		for(var i = 0; i < 10; i++){
+			//Set up the image settings
+			bitmap = new createjs.Bitmap(image);
+			othersMarblesContainer.addChild(bitmap);
+			bitmap.x = xPositions[i];
+			bitmap.y = yPositions[i];
+			bitmap.regX = bitmap.image.width/2|0;
+			bitmap.regY = bitmap.image.height/2|0;
+			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
+			bitmap.name = "orangeMarble"+i;
+			bitmap.cursor = "pointer";
+			
+			orangeMarbles[i] = bitmap;
+			
+			//Mark occupied spots as not empty
+			var mySpot = findClosestSpot(bitmap.x, bitmap.y);
+			if(mySpot != null)
+				mySpot.isEmpty = false;
+		}
+
+		document.getElementById("loader").className = "";
+		createjs.Ticker.addEventListener("tick", tick);
+		playersInitialized++;
+	} 
 	
 	//This function is run when the redmarble image is loaded. It places all the opponents marbles on the board
 	function handleOthersMarbleImageLoad(event) {
