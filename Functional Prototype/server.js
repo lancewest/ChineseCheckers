@@ -1,7 +1,7 @@
 //Server For Team 3's Chinese Checkers Project
 var express = require("express");
 var app = express();
-var port = 22657;
+var port = 22222;
 
 //This Matrix holds all the players waiting to get into a game. The players are sorted into the Matrix by the number of players 
 // that they want to be in a game with. If they are looking for Any, then they are in the first row, if they are looking for 2 
@@ -42,7 +42,7 @@ function findPlayersForGame() {
 }
 
 //Helper Function to find board position of the person who is moving given numPlayers and relativePosition to client
-function getBoardPosition(relativePosition, numPlayers) {
+/*function getBoardPosition(relativePosition, numPlayers) {
 	if(numPlayers == 6)
 		return relativePosition;
 	
@@ -60,7 +60,7 @@ function getBoardPosition(relativePosition, numPlayers) {
 		
 	if(numPlayers == 2)
 		return 3;
-}
+}*/
 
 
 // Tells socket.io to listen to an event called 'connection'.
@@ -146,7 +146,10 @@ io.sockets.on(
 	client.on(
     'win',
     function(startX, startY, endX, endY) {
-        client.broadcast.emit('win', client.user_name);
+		client.emit('you_win');
+		for(var i = 0; i<client.otherPlayers.length; i++) {
+			client.otherPlayers[i].emit('win', client.user_name);
+		}
     });
 });
 
