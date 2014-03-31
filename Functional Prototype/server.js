@@ -1,7 +1,7 @@
 //Server For Team 3's Chinese Checkers Project
 var express = require("express");
 var app = express();
-var port = 11657;
+var port = 21657;
 var players = new Array();
 
 app.use("/", express.static(__dirname));
@@ -16,7 +16,7 @@ io.sockets.on(
 	'connection',
 	function(client) {
 		// Send a welcome message first.
-		client.emit('welcome', 'Welcome to my Chinese Checkers!');
+		client.emit('welcome', 'Welcome to Chinese Checkers!');
 
 		// Listen to an event called 'login'. The client should emit this event when
 		// it wants to log in to the chat room.
