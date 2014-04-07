@@ -97,18 +97,14 @@ var socket;
 	// If server tells us that the other player moves do this:
     socket.on(
 		'move',
-		function(startX, startY, endX, endY, turn) {
-<<<<<<< HEAD
+		function(startX, startY, endX, endY, turn) 
+		{
+			/*var convertedStartSpot = convertSpot(startX, startY, boardPosition);
+			var convertedEndSpot = convertSpot(endX, endY, boardPosition);*/
 			
 			/*var convertedStartSpot = convertSpot(startX, startY, boardPosition);
 			var convertedEndSpot = convertSpot(endX, endY, boardPosition);*/
 			
-=======
-			
-			/*var convertedStartSpot = convertSpot(startX, startY, boardPosition);
-			var convertedEndSpot = convertSpot(endX, endY, boardPosition);*/
-			
->>>>>>> fe769db6b82fb84b4d507966b5276deba2be581f
 			var startSpot = spotMatrix[startY][startX];
 			var endSpot = spotMatrix[endY][endX];
 			
@@ -911,11 +907,8 @@ var socket;
 			stage.update(event);
 		}
 	}
-<<<<<<< HEAD
 	
 	document.addEventListener("contextmenu", function(e) {
 		e.preventDefault();
 	}, false);
-=======
-	
->>>>>>> fe769db6b82fb84b4d507966b5276deba2be581f
+
