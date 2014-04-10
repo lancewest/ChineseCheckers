@@ -16,6 +16,27 @@ body {
   margin-bottom: 12px;
 }
 
+#board {
+  width: 360px;
+  height: 150px;
+  border: 1px solid gray;
+  padding: 3px;
+  background: #282828;
+}
+
+#board div {
+  margin-top: 5px;
+}
+
+#msg {
+  width: 300px;
+  margin-right: 10px;
+}
+
+#send {
+  width: 50px;
+}
+
 #login_section, #chat_section, #game_section, #waiting_section {
   display: none;
 }
@@ -29,6 +50,26 @@ body {
 .testCanvas {
   width: 960;
   height: 800;
+}
+
+#chat_section {
+  position: absolute;
+  left:0;
+  bottom:0;
+}
+  
+.says {
+  font-size: 10pt;
+  color: gray;
+}
+
+.msg {
+  font-size: 12pt;
+  font-family: serif;
+}
+
+.notification {
+  color: green;
 }
 </style>
 
