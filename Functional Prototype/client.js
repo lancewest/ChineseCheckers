@@ -50,6 +50,8 @@ var socket;
       function(message) {
         $('#status').text(message);
         $('#login').attr('disabled', false);
+		$('#instructions_standard').attr('disabled',false);
+		//$('#instructions_capture').attr('disabled', false);
       });
 
     // If a login_ok message is received, proceed to the waiting section.
@@ -231,6 +233,33 @@ var socket;
       }
     });
 
+	// If the instructions button is clicked then display instructions section and
+	// hide the login section
+	$('#instructions_standard').click(function() {
+		 $('#login_section').css('display', 'none');
+		 $('#instructions_standard_section').css('display', 'block');
+		 $('#backtologin_standard').attr('disabled', false);
+	});
+	
+	// If the instructions for capture is clicked then display the rules and instructions
+	// section for the game mode capture.
+	//$('#instructions_capture').click(function() {
+		//$('#login_section').css('display', 'none');
+		//$('#instructions_capture_section').css('display', 'block');
+		//$('#backtologin_capture').attr('disabled', false);
+	//});
+	
+	// Once clicked goes back to the login section
+	$('#backtologin_standard').click(function() {
+		$('#instructions_standard_section').css('display', 'none');
+		$('#login_section').css('display', 'block');
+	});
+	
+	// Once clicked goes back to the login section
+	//$('#backtologin_capture').click(function() {
+		//$('#instructions_capture_section').css('display', 'none');
+		//$('#login_section').css('display', 'block');
+	//});
   });
 	
 	

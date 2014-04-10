@@ -37,7 +37,7 @@ body {
   width: 50px;
 }
 
-#login_section, #chat_section, #game_section, #waiting_section {
+#login_section, #chat_section, #game_section, #waiting_section, #instructions_standard_section, #instructions_capture_section {
   display: none;
 }
 
@@ -92,6 +92,9 @@ body {
 		</select>
 		<input id="login" type="button" value="Play" disabled="true"></input>
 	</div>
+	How to Play:
+	<!--<input id="instructions_capture" type="button" value="Capture" disabled="true"></input>-->
+	<input id="instructions_standard" type="button" value="Standard" disabled="true"></input>
 </div>
 
 <div id="chat_section">
@@ -109,7 +112,58 @@ body {
 	Waiting For Other Player
 </div>
 
+<div id="instructions_standard_section" align="center" >
+	<span style="color: white;">
+	<P style="font-size:45px"> <B> <U> STANDARD GAME </P> </B> </U>
+	<span style="font-size:22px">
+	<P> <B> <U>	How to Move: </B> </U> 	Click a marble and drag it to your desired spot.
+				Once you release the marble your move is finished. 
+	</P>
+	<P>	<B> <U> Valid Moves: </B> </U> 	A valid move is when you move your marble to any empty adjacent
+				 spot or in the case of hopping when you hop over a marble to an
+				 empty spot on the other side. Chain hopping can be done by doing one hop
+				 then another hop on any other marble adjacent to the spot the marble
+				 landed after the first jump. 
+	</P>
+	<P>	<B> <U> How to Win: </B> </U>	You win by getting all ten of your marbles to the triangle opposite of your
+				 start area.
+	</P>
+	</span>
+	</span>
+	<div>
+	<img src='/assets/ChainJumpEx.png' width='500' height='400' alt='Chain Jump Example' />
+	</div>
+	<div>
+	<img src='/assets/Non-jumpsEx.png' width='500' height='400' alt='Non-Jump example' />
+	</div>
+	<input id="backtologin_standard" type="button" value="Back" disabled="true"></input>
+</div>
 
+<!--<div id="instructions_capture_section" align="center" >
+	<span style="color: white;">
+	<P style="font-size:45px"> <B> <U> CAPTURE </P> </B> </U>
+	<span style="font-size:22px">
+	<P> <B> <U> How to Move: </B> </U> Click a marble and drag it to your desired spot.
+				Once you release the marble your move is finished.
+	</P>
+	<P> <B> <U> Start of the Game: </B> </U> At the start of the game all 60 pieces start in the middle of the board.
+				The center position is left unoccupied.
+	</P>
+	<P> <B> <U> Valid Moves: </B> </U> Only jumps are valid moves in this game. This means you have to make a jump to be
+				a valid move. The objective of the game is to jump over as many pieces as possible so you can "capture" them.
+				The game is over once no more jump moves can be made.
+	</P>
+	<P> <B> <U> How to Win: </B> </U> Once no more jump moves are available on the board the game is over. Once the game is over
+				the player with the most captured pieces will be declared the winner.
+	</P>
+	</span>
+	</span>
+	<div>
+	<img src='/assets/ChainJumpEx.png' width='400' height='300' alt='Chain Jump Example' />
+	</div>
+	<div>
+	<input id="backtologin_capture" type="button" value="Back" disabled="true"></input>
+</div>-->
 
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
