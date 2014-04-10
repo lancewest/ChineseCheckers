@@ -683,27 +683,27 @@ var socket;
 		var yPositions;
 		
 		if(position == 0) {
-			xPositions = [425,475,525,575,450,500,550,475,525,500];
+			xPositions = [418,473,528,583,445,500,555.5,473,528,500];
 			yPositions = [700,700,700,700,750,750,750,800,800,850];
 		}
 		else if(position == 1) {
-			xPositions = [350,300,250,200,325,275,225,300,250,275];
+			xPositions = [335,280,225,170,308,253,198,280,225,252];
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		else if(position == 2) {
-			xPositions = [350,300,250,200,325,275,225,300,250,275]; 
+			xPositions = [335,280,225,170,306,254,199,280,225,252]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(position == 3) {
-			xPositions = [500,475,525,450,500,550,425,475,525,575];
+			xPositions = [500,472,527,445,500,555,418,472,528,583];
 			yPositions = [50,100,100,150,150,150,200,200,200,200];
 		}
 		else if(position == 4) {
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			xPositions = [830,775,720,665,802,747,692,775,720,747]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(position == 5) {
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			xPositions = [830,775,720,665,802,747,693,775,720,747]; 
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		
@@ -714,7 +714,7 @@ var socket;
 		}
 	}
 	
-	//This function is called when the grey spot image is loaded. It positions the empty spots and initializes the matrix that holds them and the links between them
+	//This function is called when the grey spot image is loaded. It positions the empty spots and initializes the matrix that holds them and the links between them	
 	function handleSpotImageLoad(event) {
 
 		var image = event.target;
@@ -731,13 +731,13 @@ var socket;
 		// create and are position the grey spots
 		for(var y = 0; y < 17; y++){
 			spotMatrix[y] = new Array(spotsPerLine[y]);
-			var startPointX = 500-(((spotsPerLine[y]-1)/2)*50);
+			var startPointX = 500-(((spotsPerLine[y]-1)/2)*55);
 			for(var x = 0; x < spotsPerLine[y]; x++){
 				bitmap = new createjs.Bitmap(image);
 				spotContainer.addChild(bitmap);
 				bitmap.regX = bitmap.image.width/2|0;
 				bitmap.regY = bitmap.image.height/2|0;
-				bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.6;
+				bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.64;
 				bitmap.x = startPointX;
 				bitmap.y = (y+1)*50;
 				bitmap.name = "spot_"+y+" "+x;
@@ -753,7 +753,7 @@ var socket;
 				
 				spotMatrix[y][x] = spot;
 				
-				startPointX += 50;
+				startPointX += 55;
 				
 				/*if(y==11 && x==1)
 					console.debug("Left Point: " + bitmap.x + "," + bitmap.y);
@@ -781,33 +781,33 @@ var socket;
 		var yPositions;
 		
 		if(boardPosition == 0) {
-      image = blueMarbleImage;
-			xPositions = [425,475,525,575,450,500,550,475,525,500];
+			image = blueMarbleImage;
+			xPositions = [418,473,528,583,445,500,555.5,473,528,500];
 			yPositions = [700,700,700,700,750,750,750,800,800,850];
 		}
 		else if(boardPosition == 1) {
-      image = redMarbleImage;
-			xPositions = [350,300,250,200,325,275,225,300,250,275];
+			image = redMarbleImage;
+			xPositions = [335,280,225,170,308,253,198,280,225,252];
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		else if(boardPosition == 2) {
-      image = greenMarbleImage;
-			xPositions = [350,300,250,200,325,275,225,300,250,275]; 
+			image = greenMarbleImage;
+			xPositions = [335,280,225,170,306,254,199,280,225,252]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 3) {
-      image = yellowMarbleImage;
-			xPositions = [500,475,525,450,500,550,425,475,525,575];
+			image = yellowMarbleImage;
+			xPositions = [500,472,527,445,500,555,418,472,528,583];
 			yPositions = [50,100,100,150,150,150,200,200,200,200];
 		}
 		else if(boardPosition == 4) {
-      image = orangeMarbleImage;
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			image = orangeMarbleImage;
+			xPositions = [830,775,720,665,802,747,692,775,720,747]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 5) {
-      image = purpleMarbleImage;
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			image = purpleMarbleImage;
+			xPositions = [830,775,720,665,802,747,693,775,720,747]; 
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		else
@@ -933,34 +933,34 @@ var socket;
 		var xPositions;
 		var yPositions;
 		
-		if(boardPosition == 0) {
-      image = blueMarbleImage;
-			xPositions = [425,475,525,575,450,500,550,475,525,500];
+	if(boardPosition == 0) {
+			image = blueMarbleImage;
+			xPositions = [418,473,528,583,445,500,555.5,473,528,500];
 			yPositions = [700,700,700,700,750,750,750,800,800,850];
 		}
 		else if(boardPosition == 1) {
-      image = redMarbleImage;
-			xPositions = [350,300,250,200,325,275,225,300,250,275];
+			image = redMarbleImage;
+			xPositions = [335,280,225,170,308,253,198,280,225,252];
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		else if(boardPosition == 2) {
-      image = greenMarbleImage;
-			xPositions = [350,300,250,200,325,275,225,300,250,275]; 
+			image = greenMarbleImage;
+			xPositions = [335,280,225,170,306,254,199,280,225,252]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 3) {
-      image = yellowMarbleImage;
-			xPositions = [500,475,525,450,500,550,425,475,525,575];
+			image = yellowMarbleImage;
+			xPositions = [500,472,527,445,500,555,418,472,528,583];
 			yPositions = [50,100,100,150,150,150,200,200,200,200];
 		}
 		else if(boardPosition == 4) {
-      image = orangeMarbleImage;
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			image = orangeMarbleImage;
+			xPositions = [830,775,720,665,802,747,692,775,720,747]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 5) {
-      image = purpleMarbleImage;
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			image = purpleMarbleImage;
+			xPositions = [830,775,720,665,802,747,693,775,720,747]; 
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		
