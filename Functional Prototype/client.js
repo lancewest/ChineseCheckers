@@ -79,6 +79,7 @@ $(document).ready(function() {
         $('#status').text('Playing.');
 		
         loadMarbles(numPlayers, myTurnOrder);
+		setInterval(function(){updateTimer()}, 100);
 		
 		if(turn == "Your Turn!") {
               
@@ -121,43 +122,10 @@ $(document).ready(function() {
 			endSpot.isEmpty = false;
 			
 			var marble = findClosestOpponentMarble(startSpot.screenX, startSpot.screenY);
-            /*
-              var page = document.getElementById("canvas");
-              stage = new Stage(page);
-              stage.addChild(marble);
-              createjs.Ticker.addEventListener("tick", handleTick);
-              Ticker.setFPS(500);
-              Ticker.addListener(Window);
-              Ticker.addListener(stage);
-              function handleTick() {
-                if (startX < endX) {
-                    if (marble.x != endX) {
-                        marble.x = marble.x + 1;
-                    } // end if statment
-                } else if (startX > endX) {
-                    if (marble.x != endX) {
-                        marble.x = marble.x - 1;
-                    } // end if statement
-                } // end if else statment
-              
-                if (startY < endY) {
-                    if (marble.y != endY) {
-                        marble.y = marble.y + 1;
-                    } // end if statment
-                } else if (startY > endY) {
-                    if (marble.y != endY) {
-                        marble.y = marble.y - 1;
-                    } // end if statement
-                } // end if else statment
-                stage.update();
-              } // end function tick()
-            */
-           // Ticker.setFPS(30);
-           // Ticker.addListener(stage);
-           // var tween = Tween.get(marble).to({ x: endX, y: endY }, 5000);
-           // createjs.Ticker.addEventListener("tick", stage);
-            marble.x = endSpot.screenX;
-            marble.y = endSpot.screenY;
+			marble.parent.addChild(marble);
+			marble.offset = {x:marble.x, y:marble.y};
+            var tween = createjs.Tween.get(marble).to({ "x": endSpot.screenX, "y": endSpot.screenY }, 1000);
+           
               
 			if(turn == "Your Turn!") {
               
@@ -313,6 +281,7 @@ $(document).ready(function() {
 		} // end if statement
         
 		document.getElementById("loader").className = "loader";
+		createjs.MotionGuidePlugin.install();
         
 		// create stage and point it to the canvas:
 		canvas = document.getElementById("testCanvas");
@@ -1049,6 +1018,8 @@ $(document).ready(function() {
 					var o = evt.target;
 					o.scaleX = o.scaleY = 0.65;
 					o.parent.addChild(o);
+					console.debug("evt.stageX:" + evt.stageX);
+					console.debug("evt.stageY:" + evt.stageY);
 					o.offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
 					
 					moveingFrom.screenX = o.x;
@@ -1227,9 +1198,17 @@ $(document).ready(function() {
 
 		document.getElementById("loader").className = "";
 		createjs.Ticker.addEventListener("tick", tick);
+		createjs.Ticker.setFPS(30);
 		playersInitialized++;
         
 	} // end function handleOthersMarlbleImageLoad(boardPosition) {
+	
+	// updates timer to animate piece moves
+	function updateTimer() { 
+	
+		update = true;
+	
+	} // end function updateTimer()
 
 	function tick(event) {
         
