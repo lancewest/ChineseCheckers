@@ -21,13 +21,14 @@ var socket;
 	
 	// Declare Marble Images
 	var redMarbleImage;
-	var myMarbleImage;
+	var blueMarbleImage;
 	var orangeMarbleImage; 
 	var greenMarbleImage; 
 	var yellowMarbleImage; 
 	var purpleMarbleImage; 
 		
-	
+	var playerIdentifier = "unassigned";
+  var numberOfPlayers;
 	
   // $(document) returns a jQuery object representing the whole document (page).
   // $(document).ready(fn) tells jQuery to call function 'fn' after the whole
@@ -35,8 +36,8 @@ var socket;
   $(document).ready(function() {
     // Hide the warning section and show the login section.
     $('#warning').css('display', 'none');
-	$('#game_section').css('display', 'none');
-	$('#waiting_section').css('display', 'none');
+	  $('#game_section').css('display', 'none');
+	  $('#waiting_section').css('display', 'none');
     $('#login_section').css('display', 'block');
 
     // Initialize socket.io.
@@ -67,9 +68,11 @@ var socket;
       function(turn, numPlayers, myTurnOrder) {
         $('#waiting_section').css('display', 'none');
         $('#game_section').css('display', 'block');
+        $('#chat_section').css('display', 'block');
         $('#status').text('Playing.');
 		
-		loadMarbles(numPlayers, myTurnOrder)
+    numberOfPlayers = numPlayers;
+		loadMarbles(numPlayers, myTurnOrder);
 		
 		if(turn == "Your Turn!")
 		{
@@ -105,15 +108,17 @@ var socket;
 			/*var convertedStartSpot = convertSpot(startX, startY, boardPosition);
 			var convertedEndSpot = convertSpot(endX, endY, boardPosition);*/
 			
-			var startSpot = spotMatrix[startY][startX];
-			var endSpot = spotMatrix[endY][endX];
+      if(startX != 0 || startY != 0 || endX != 0 || endY != 0) {
+			  var startSpot = spotMatrix[startY][startX];
+			  var endSpot = spotMatrix[endY][endX];
 			
-			startSpot.isEmpty = true;
-			endSpot.isEmpty = false;
+			  startSpot.isEmpty = true;
+			  endSpot.isEmpty = false;
 			
-			var marble = findClosestOpponentMarble(startSpot.screenX, startSpot.screenY);
-			marble.x = endSpot.screenX;
-			marble.y = endSpot.screenY;
+			  var marble = findClosestOpponentMarble(startSpot.screenX, startSpot.screenY);
+			  marble.x = endSpot.screenX;
+			  marble.y = endSpot.screenY;
+      }
 			
 			if(turn == "Your Turn!")
 			{
@@ -157,11 +162,52 @@ var socket;
 			myTurn = false;
         });
 
+    socket.on(
+      'chat',
+      function(message) {
+        //if (message && message.user_name && message.msg) {
+          var user_name = message.user_name;
+          var msg = message.msg;
+          // This will create a div element using the HTML code:
+          var div = $('<div></div>');
+          // Similarly, create span elements with CSS classes and corresponding
+          // contents, and append them in a row to the new div element.
+          div.append($('<span></span>').addClass('user_name').text(user_name));
+          div.append($('<span></span>').addClass('says').text(' says: '));
+          div.append($('<span></span>').addClass('msg').text(msg));
+          // Add the new div element to the chat board.
+          $('#board').append(div);
+          update = true;
+        //}
+      });
+      
+      socket.on(
+      'dropped',
+      function(player) {
+        removePlayerMarbles(player);
+        numberOfPlayers = numberOfPlayers - 1;
+        if(numberOfPlayers == 1)
+          turnTracker.text = "You Win!"
+      });
+
+    // If a notification is received, display it.
+    socket.on(
+      'notification',
+      function(message) {
+        if (message) {
+          // Similar to the handler of 'chat' event ...
+          var div = $('<div></div>');
+          div.append($('<span></span>').addClass('notification').text(message));
+          $('#board').append(div);
+          update = true;
+        }
+      });
+        
     // When the Log In button is clicked, the provided function will be called,
     // which sends a login message to the server.
     $('#login').click(function() {
       var name = $('#name').val();
-	  var numPlayers = $('#numPlayers').val();
+	    var numPlayers = $('#numPlayers').val();
       if (name) {
         name = name.trim();
         if (name.length > 0) {
@@ -172,6 +218,38 @@ var socket;
       $('#name').val('');
     });
 
+    $('#send').click(function() {
+      var data = $('#msg').val();
+      if (data) {
+        data = data.trim();
+        if (data.length > 0) {
+          socket.emit('chat', data);
+        }
+      }
+      // Clear the input field.
+      $('#msg').val('');
+    });
+    
+    $('#surrender').click(function() {
+        $('#warning').css('display', 'none');
+	      $('#game_section').css('display', 'none');
+	      $('#waiting_section').css('display', 'none');
+        $('#chat_section').css('display', 'none');
+        $('#login_section').css('display', 'block');
+        
+        
+        socket.emit('move', 0, 0, 0, 0);
+        socket.emit('dropped', playerIdentifier);
+        
+        location.reload(true);
+    });
+    
+    $('#msg').keyup(function(event) {
+      if (event.keyCode == 13) {
+        $('#send').click();
+      }
+    });
+    
     // When Enter is pressed in the name field, it should be treated as clicking
     // on the Log In button.
     $('#name').keyup(function(event) {
@@ -211,8 +289,8 @@ var socket;
 		redMarbleImage = new Image();
 		redMarbleImage.src = "assets/Rmarble.png"; 
 		// load the my blue marble image image:
-		myMarbleImage = new Image();
-		myMarbleImage.src = "assets/Bmarble.png"; 
+		blueMarbleImage = new Image();
+		blueMarbleImage.src = "assets/Bmarble.png"; 
 		// load the orange marble image:
 		orangeMarbleImage = new Image(); 
 		orangeMarbleImage.src = "assets/Omarble.png"; 
@@ -299,28 +377,33 @@ var socket;
 		othersMarbles = [ ];
 		
 		var myBoardPosition = getMyBoardPosition(numPlayers, myTurnOrder);
+    
+    if     (myBoardPosition == 0) playerIdentifier = "blue";
+    else if(myBoardPosition == 1) playerIdentifier = "red";
+    else if(myBoardPosition == 2) playerIdentifier = "green";
+    else if(myBoardPosition == 3) playerIdentifier = "yellow"
+    else if(myBoardPosition == 4) playerIdentifier = "orange";
+    else if(myBoardPosition == 5) playerIdentifier = "purple";
+    
+    
 		var othersBoardPositions = getOthersBoardPositions(numPlayers, myBoardPosition);
 		
-		handleMyMarbleImageLoad(myMarbleImage, myBoardPosition);
-		
-		if(numPlayers == 2) {
-			handleOthersMarlbleImageLoad(redMarbleImage, othersBoardPositions[0]);
+		if(numPlayers >= 2) {
+      handleMyMarbleImageLoad(myBoardPosition);
+			handleOthersMarlbleImageLoad(othersBoardPositions[0]);
 		}
-		else if(numPlayers == 3) {
-			handleOthersMarlbleImageLoad(redMarbleImage, othersBoardPositions[0]);
-			handleOthersMarlbleImageLoad(greenMarbleImage, othersBoardPositions[1]);
+    
+		if(numPlayers >= 3) {
+			handleOthersMarlbleImageLoad(othersBoardPositions[1]);
 		}
-		else if(numPlayers == 4) {
-			handleOthersMarlbleImageLoad(redMarbleImage, othersBoardPositions[0]);
-			handleOthersMarlbleImageLoad(greenMarbleImage, othersBoardPositions[1]);
-			handleOthersMarlbleImageLoad(yellowMarbleImage, othersBoardPositions[2]);
+    
+		if(numPlayers >= 4) {
+			handleOthersMarlbleImageLoad(othersBoardPositions[2]);
 		}
-		else if(numPlayers ==  6) {
-			handleOthersMarlbleImageLoad(redMarbleImage, othersBoardPositions[0]);
-			handleOthersMarlbleImageLoad(greenMarbleImage, othersBoardPositions[1]);
-			handleOthersMarlbleImageLoad(yellowMarbleImage, othersBoardPositions[2]);
-			handleOthersMarlbleImageLoad(orangeMarbleImage, othersBoardPositions[3]);
-			handleOthersMarlbleImageLoad(purpleMarbleImage, othersBoardPositions[4]);
+    
+		if(numPlayers == 6) {
+			handleOthersMarlbleImageLoad(othersBoardPositions[3]);
+			handleOthersMarlbleImageLoad(othersBoardPositions[4]);
 		}
 	}
 
@@ -632,7 +715,9 @@ var socket;
 		}
 		
 		for(var i =0; i<10; i++) {
-			findClosestSpot(xPositions[i], yPositions[i]).home = true;
+			var currentSpot = findClosestSpot(xPositions[i], yPositions[i]);
+      currentSpot.home = true;
+      //spotMatrix[currentSpot.y][currentSpot.x].
 		}
 	}
 	
@@ -693,9 +778,9 @@ var socket;
 	}
 	
 	//This function is run when the blue marble image is loaded and positions the blue marbles (this players marbles)
-	function handleMyMarbleImageLoad(image, boardPosition) {
+	function handleMyMarbleImageLoad(boardPosition) {
 		myMarbles = new Array(10);
-		//var image = event.target;
+		var image;
 		var bitmap;
 
 		//list of starting positions
@@ -703,26 +788,32 @@ var socket;
 		var yPositions;
 		
 		if(boardPosition == 0) {
+      image = blueMarbleImage;
 			xPositions = [425,475,525,575,450,500,550,475,525,500];
 			yPositions = [700,700,700,700,750,750,750,800,800,850];
 		}
 		else if(boardPosition == 1) {
+      image = redMarbleImage;
 			xPositions = [350,300,250,200,325,275,225,300,250,275];
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		else if(boardPosition == 2) {
+      image = greenMarbleImage;
 			xPositions = [350,300,250,200,325,275,225,300,250,275]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 3) {
+      image = yellowMarbleImage;
 			xPositions = [500,475,525,450,500,550,425,475,525,575];
 			yPositions = [50,100,100,150,150,150,200,200,200,200];
 		}
 		else if(boardPosition == 4) {
+      image = orangeMarbleImage;
 			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 5) {
+      image = purpleMarbleImage;
 			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
@@ -797,6 +888,15 @@ var socket;
 						}
 					}
 				});
+        
+      bitmap.on("click", function(evt) {
+        if(evt == 1 || evt == 2) {
+          alert("Am I getting here?");
+				  evt.preventDefault();
+				  o.x = moveingFrom.screenX;
+				  o.y = moveingFrom.screenY;
+        }
+		  });
 			
 			// the pressmove event is dispatched when the mouse moves after a mousedown on the target until the mouse is released.
 			bitmap.addEventListener("pressmove", function(evt) {
@@ -841,34 +941,48 @@ var socket;
 	}
 	
 	// This function is run when the purple marble image is loaded.
-	function handleOthersMarlbleImageLoad(image, boardPosition) { 
+	function handleOthersMarlbleImageLoad(boardPosition) { 
 		var bitmap;
-		
+		var image;
+    var id;
+    
 		//list of starting positions
 		var xPositions;
 		var yPositions;
 		
 		if(boardPosition == 0) {
+      image = blueMarbleImage;
+      id = "blue";
 			xPositions = [425,475,525,575,450,500,550,475,525,500];
 			yPositions = [700,700,700,700,750,750,750,800,800,850];
 		}
 		else if(boardPosition == 1) {
+      image = redMarbleImage;
+      id = "red";
 			xPositions = [350,300,250,200,325,275,225,300,250,275];
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		else if(boardPosition == 2) {
+      image = greenMarbleImage;
+      id = "green";
 			xPositions = [350,300,250,200,325,275,225,300,250,275]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 3) {
+      image = yellowMarbleImage;
+      id = "yellow";
 			xPositions = [500,475,525,450,500,550,425,475,525,575];
 			yPositions = [50,100,100,150,150,150,200,200,200,200];
 		}
 		else if(boardPosition == 4) {
+      image = orangeMarbleImage;
+      id = "orange";
 			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 5) {
+      image = purpleMarbleImage;
+      id = "purple";
 			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
@@ -882,7 +996,7 @@ var socket;
 			bitmap.regX = bitmap.image.width/2|0;
 			bitmap.regY = bitmap.image.height/2|0;
 			bitmap.scaleX = bitmap.scaleY = bitmap.scale = 0.55;
-			bitmap.name = "otherMarble"+othersMarbles.length;
+			bitmap.name = id;//"otherMarble"+othersMarbles.length;
 			bitmap.cursor = "pointer";
 			
 			othersMarbles.push(bitmap);
@@ -898,6 +1012,20 @@ var socket;
 		playersInitialized++;
 	} 
 
+  function removePlayerMarbles(player) {
+    //console.debug("Entering removePlayerMarbles function");
+    othersMarbles.forEach(function(elem){
+                                          if(elem.name == player) {
+                                            var spotToUnmark = findClosestSpot(elem.x, elem.y);
+                                            if(spotToUnmark != null) {
+                                              spotToUnmark.isEmpty = true;
+                                            }
+                                            othersMarblesContainer.removeChild(elem);
+                                          }
+                                        });
+    update = true;
+  }
+  
 	function tick(event) {
 		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
 		event.preventDefault();
@@ -911,4 +1039,12 @@ var socket;
 	document.addEventListener("contextmenu", function(e) {
 		e.preventDefault();
 	}, false);
-
+  
+  /*
+  $('document').mousedown(function(e){
+    if(e.button==1) {
+      e.preventDefault();
+      return false
+    }
+  });
+  */

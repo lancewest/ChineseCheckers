@@ -1,7 +1,7 @@
 //Server For Team 3's Chinese Checkers Project
 var express = require("express");
 var app = express();
-var port = 22222;
+var port = 22225;
 
 //This Matrix holds all the players waiting to get into a game. The players are sorted into the Matrix by the number of players 
 // that they want to be in a game with. If they are looking for Any, then they are in the first row, if they are looking for 2 
@@ -13,6 +13,8 @@ for(var i = 0; i<7; i++)
 app.use("/", express.static(__dirname));
 
 var io = require('socket.io').listen(app.listen(port));
+
+var droppedClient = [];
 
 
 //Helper Function to match players with simular settings
@@ -62,6 +64,16 @@ function findPlayersForGame() {
 		return 3;
 }*/
 
+/*function hasDropped(playerName) {
+  for(int i = 0; i < droppedClient.length; i++) {
+    if(playerName == droppedClient[i]) {
+      return true;
+    }
+  }
+  
+  return false;
+}*/
+
 
 // Tells socket.io to listen to an event called 'connection'.
 // This is a built-in event that is triggered when a client connects to the
@@ -85,9 +97,9 @@ io.sockets.on(
 					client.user_name = name;
 					client.numPlayers = numPlayers;
 					client.otherPlayers = [ ];
-					
-					client.emit('login_ok');
-					
+          
+          client.emit('login_ok');
+          
 					var playersInGame = findPlayersForGame();
 					if(playersInGame != null && playersInGame.length > 1) {
 					
@@ -96,6 +108,11 @@ io.sockets.on(
 								playersInGame[i].next = playersInGame[0];
 							else
 								playersInGame[i].next = playersInGame[i+1];
+                
+              if(i == 0)
+								playersInGame[i].prev = playersInGame[playersInGame.length-1];
+							else
+								playersInGame[i].prev = playersInGame[i-1];
 							
 							if(i == 0)
 								playersInGame[i].emit('start_game', "Your Turn!", playersInGame.length, i);
@@ -121,9 +138,15 @@ io.sockets.on(
 	client.on(
     'move',
     function(startX, startY, endX, endY) {
-		client.emit('you_moved', client.next.user_name + "'s Turn.");
+		
 	
-		for(var i = 0; i<client.otherPlayers.length; i++) {
+    /*var originalClient = client;
+  
+    while(hasDropped(client.next.user_name)) {
+      client = client.next;
+    }*/
+  
+		for(var i = 0; i< client.otherPlayers.length; i++) {
 		
 			/*var iterator = client.otherPlayers[i].next;
 			var relativePositionOfMover = 1;
@@ -133,12 +156,14 @@ io.sockets.on(
 			}
 			
 			var boardPosition = getBoardPosition(relativePositionOfMover, client.otherPlayers.length+1);*/
-		
+		  
+      
 			if(client.otherPlayers[i] == client.next)
 				client.otherPlayers[i].emit('move', startX, startY, endX, endY, "Your Turn!");
 			else
 				client.otherPlayers[i].emit('move', startX, startY, endX, endY, client.next.user_name + "'s Turn.");
 		}
+    client.emit('you_moved', client.next.user_name + "'s Turn.");
     });
 	
 	// Listen to an event called 'win'. The client should emit this event when
@@ -151,5 +176,29 @@ io.sockets.on(
 			client.otherPlayers[i].emit('win', client.user_name);
 		}
     });
+    
+  client.on(
+    'chat',
+    function(message) {
+      var name = client.user_name;
+      
+      client.emit('chat', { user_name: name, msg: message });
+		for(var i = 0; i<client.otherPlayers.length; i++) {
+			client.otherPlayers[i].emit('chat', { user_name: name, msg: message });
+		}
+  });
+  
+  client.on(
+    'dropped',
+    function(player) {
+      //droppedClient.push(client.user_name);
+      var previousClient = client.prev;
+      previousClient.next = client.next;
+      client.next.prev = previousClient;
+      //io.sockets.emit('chat', {user_name: 'debug', msg: "Previous: " + previousClient.user_name + " Next: " + client.next + " Previous.Next: " + previousClient.next});
+      client.emit('dropped', player);
+		for(var i = 0; i<client.otherPlayers.length; i++) {
+			client.otherPlayers[i].emit('dropped', player);
+		}
+  });
 });
-
