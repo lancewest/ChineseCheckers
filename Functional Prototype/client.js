@@ -81,6 +81,7 @@ $(document).ready(function() {
         $('#status').text('Playing.');
 		
         loadMarbles(numPlayers, myTurnOrder);
+		setInterval(function(){updateTimer()}, 100);
 		
 		//Initialize player list and timersManager
 		timersManager.timers = new Array(numPlayers);
@@ -158,6 +159,13 @@ $(document).ready(function() {
 			endSpot.isEmpty = false;
 			
 			var marble = findClosestOpponentMarble(startSpot.screenX, startSpot.screenY);
+			marble.parent.addChild(marble);
+			marble.offset = {x:marble.x, y:marble.y};
+            var tween = createjs.Tween.get(marble).to({ "x": endSpot.screenX, "y": endSpot.screenY }, 1000);
+           
+              
+			if(turn == "Your Turn!") {
+              
             /*
               var page = document.getElementById("canvas");
               stage = new Stage(page);
@@ -380,6 +388,7 @@ $(document).ready(function() {
 		} // end if statement
         
 		document.getElementById("loader").className = "loader";
+		createjs.MotionGuidePlugin.install();
         
 		// create stage and point it to the canvas:
 		canvas = document.getElementById("testCanvas");
@@ -1112,13 +1121,13 @@ $(document).ready(function() {
 				evt.preventDefault();
 				if(myTurn && evt.nativeEvent.button == 0) {
                                     
+                                    
 					// bump the target in front of its siblings:
 					var o = evt.target;
 					o.scaleX = o.scaleY = 0.65;
 					o.parent.addChild(o);
-					console.debug("x:"+evt.stageX);
-					console.debug("y:"+evt.stageY);
-					
+					console.debug("evt.stageX:" + evt.stageX);
+					console.debug("evt.stageY:" + evt.stageY);
 					o.offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
 					
 					moveingFrom.screenX = o.x;
@@ -1184,6 +1193,7 @@ $(document).ready(function() {
                                     
 				evt.preventDefault();
 				if(myTurn && evt.nativeEvent.button == 0) {
+                                    
                                     
 					evt.preventDefault();
 					var o = evt.target;
@@ -1307,9 +1317,17 @@ $(document).ready(function() {
 
 		document.getElementById("loader").className = "";
 		createjs.Ticker.addEventListener("tick", tick);
+		createjs.Ticker.setFPS(30);
 		playersInitialized++;
         
 	} // end function handleOthersMarlbleImageLoad(boardPosition) {
+	
+	// updates timer to animate piece moves
+	function updateTimer() { 
+	
+		update = true;
+	
+	} // end function updateTimer()
 
 	function tick(event) {
         

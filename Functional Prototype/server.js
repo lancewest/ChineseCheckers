@@ -111,6 +111,7 @@ io.sockets.on(
 			'login',
 			function(name, numPlayers, timerSetting) {
                   
+                  
 				// This function extracts the user name from the login message, stores
 				// it to the client object, sends a login_ok message to the client
 				if (name != null) {
