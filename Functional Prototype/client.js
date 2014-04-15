@@ -11,8 +11,9 @@
 	var myMarbles = [];     // contains your game pieces
 	var moveingFrom = [];
 	var myTurn = true;
-	var turnTracker = new createjs.Text("Your Turn!", "30px Arial", "#ff7700");
+	var turnTracker = new createjs.Text("Your Turn!", "20px Arial", "#ff7700");
 	var timersManager = [];
+  var gameOver = false;
 	
 	var spotsInitialized = false;
 	var playersInitialized = 0;
@@ -48,7 +49,7 @@ $(document).ready(function() {
                   
                   // Initialize socket.io.
                   // document.location.host returns the host of the current page.
-
+                  socket = io.connect('http://' + document.location.host);
 
     // If a welcome message is received from server, display welcome message and
     // the Log In button will be then enabled.
@@ -81,7 +82,8 @@ $(document).ready(function() {
         $('#status').text('Playing.');
 		
     	numberOfPlayers = numPlayers;
-		setInterval(function(){updateTimer()}, 100);
+      loadMarbles(numPlayers, myTurnOrder);
+      setInterval(function(){updateTimer()}, 100);
 		
 		//Initialize player list and timersManager
 		timersManager.timers = new Array(numPlayers);
@@ -99,6 +101,7 @@ $(document).ready(function() {
 			var defaultTime = timersManager.countDown ? 120 : 0;
 		
 			timersManager.timers[i] = [ ];
+      timersManager.timers[i].isMe = i == myTurnOrder;
 			
 			var timeInMinutes = Math.floor(defaultTime/60) +":0" + defaultTime%60;
 			timersManager.timers[i].textElement = new createjs.Text(playerNames[i] + " - " + timeInMinutes, "22px Arial", "#ff7700");
@@ -107,6 +110,7 @@ $(document).ready(function() {
 			
 			timersManager.timers[i].isNewTurn = timersManager.countDown;
 			timersManager.timers[i].time = defaultTime;
+      timersManager.timers[i].firstTurn = true;
 			timersManager.timers[i].userName = playerNames[i];
 			
 			timersContainer.addChild(timersManager.timers[i].textElement);
@@ -170,7 +174,8 @@ $(document).ready(function() {
 																
 			if(timersManager.countDown)
 				timersManager.timers[timersManager.turnIndex].isNewTurn = true;
-			  
+			}
+      
 			if(turn == "Your Turn!") {
               
 				turnTracker.text = "Your Turn!";
@@ -199,6 +204,7 @@ $(document).ready(function() {
     socket.on(
 		'you_win',
 		function(turn) {
+      gameOver = true;
 			turnTracker.text = "You Win!";
 			myTurn = false;
 			update = true;
@@ -209,7 +215,7 @@ $(document).ready(function() {
       'win',
       function(winner) {
 			update = true;
-			
+			gameOver = true;
 			turnTracker.text = "Game Over! You Lose! " + winner + " wins!";
 			myTurn = false;
         }); // end socket.on for win
@@ -235,11 +241,19 @@ $(document).ready(function() {
       
       socket.on(
       'dropped',
-      function(player) {
+      function(player, timerOrder) {
+        timersManager.timers.splice(timerOrder, 1);
+        if(timersManager.turnIndex == timerOrder)
+          timersManager.turnIndex++;
+        if(timersManager.turnIndex >= timersManager.timers.length)
+          timersManager.turnIndex = 0;
+      
         removePlayerMarbles(player);
         numberOfPlayers = numberOfPlayers - 1;
-        if(numberOfPlayers == 1)
-          turnTracker.text = "You Win!"
+        if(numberOfPlayers == 1 && playerIdentifier != player) {
+          socket.emit('win');
+          gameOver = true;
+          }
       });
 
     // If a notification is received, display it.
@@ -343,24 +357,43 @@ $(document).ready(function() {
 	
 	//Used for timers
 	function updateTimeManager() {
+    if(gameOver)
+      return;
+  
 		var timerToChange = timersManager.timers[timersManager.turnIndex];
+    
 		if(timersManager.countDown)
 			timerToChange.time -= 0.5;
 		else
 			timerToChange.time += 0.5;
+      
+    if(timersManager.countDown && timerToChange.time <= 0) {
+      timerToChange.textElement.text = timerToChange.userName + " - 0:00 - Out Of Time";
+      update = true;
+      timersManager.timers.splice(timersManager.turnIndex, 1);
+      
+      if(timersManager.turnIndex >= timersManager.timers.length)
+        timersManager.turnIndex = 0;
+        
+      if(timerToChange.isMe) {
+        socket.emit('move', 0, 0, 0, 0);
+        socket.emit('dropped', playerIdentifier);
+      }
+    }
 		
 		var seconds = Math.round(timerToChange.time%60) < 10 ? "0" + Math.round(timerToChange.time%60) : Math.round(timerToChange.time%60);
 		var timeInMinutes = Math.floor(timerToChange.time/60) +":" + seconds;
-		if(timerToChange.isNewTurn) {
-			timerToChange.isNewTurn = false;
-			timerToChange.time += 15;
+    
+		if(timerToChange.isNewTurn && !timerToChange.firstTurn) {
+      timerToChange.time += 15;
 			timeInMinutes = Math.floor(timerToChange.time/60) +":" + Math.round(timerToChange.time%60) + "   +15 sec";
 		}
-		
+		timerToChange.isNewTurn = false;
+    timerToChange.firstTurn = false;
+    
 		timerToChange.textElement.text = timerToChange.userName + " - " + timeInMinutes;
 		update = true;
 		
-		//Add code here to make player lose when time runs out
 	}
 	
 	//Called to initialize the board when a client connects
@@ -1260,37 +1293,37 @@ $(document).ready(function() {
 		if(boardPosition == 0) {
       image = blueMarbleImage;
       id = "blue";
-			xPositions = [425,475,525,575,450,500,550,475,525,500];
+			xPositions = [418,473,528,583,445,500,555.5,473,528,500];
 			yPositions = [700,700,700,700,750,750,750,800,800,850];
 		}
 		else if(boardPosition == 1) {
       image = redMarbleImage;
       id = "red";
-			xPositions = [350,300,250,200,325,275,225,300,250,275];
+			xPositions = [335,280,225,170,308,253,198,280,225,252];
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
 		}
 		else if(boardPosition == 2) {
       image = greenMarbleImage;
       id = "green";
-			xPositions = [350,300,250,200,325,275,225,300,250,275]; 
+			xPositions = [335,280,225,170,306,254,199,280,225,252]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 3) {
       image = yellowMarbleImage;
       id = "yellow";
-			xPositions = [500,475,525,450,500,550,425,475,525,575];
+			xPositions = [500,472,527,445,500,555,418,472,528,583];
 			yPositions = [50,100,100,150,150,150,200,200,200,200];
 		}
 		else if(boardPosition == 4) {
       image = orangeMarbleImage;
       id = "orange";
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			xPositions = [830,775,720,665,802,747,692,775,720,747]; 
 			yPositions = [250,250,250,250,300,300,300,350,350,400];
 		}
 		else if(boardPosition == 5) {
       image = purpleMarbleImage;
       id = "purple";
-			xPositions = [800,750,700,650,775,725,675,750,700,725]; 
+			xPositions = [830,775,720,665,802,747,693,775,720,747]; 
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
             
 		} // end if else statement

@@ -1,7 +1,7 @@
 //Server For Team 3's Chinese Checkers Project
 var express = require("express");
 var app = express();
-var port = 11111;
+var port = 22225;
 
 //This Matrix holds all the players waiting to get into a game. The players are sorted into the Matrix by the number of players 
 // that they want to be in a game with. If they are looking for Any, then they are in the first row, if they are looking for 2 
@@ -144,14 +144,16 @@ io.sockets.on(
 						}
 					
 						for(var i = 0; i<playersInGame.length; i++) {
+              client.myTurnOrder = i;
                   
-                            if(i == playersInGame.length-1) {
-                  
-								playersInGame[i].next = playersInGame[0];
-                  
-                            } else {
-                  
-								playersInGame[i].next = playersInGame[i+1];
+              if(i == playersInGame.length-1) {
+    
+                playersInGame[i].next = playersInGame[0];
+    
+              } else {
+    
+                playersInGame[i].next = playersInGame[i+1];
+              }
                 
               if(i == 0)
 								playersInGame[i].prev = playersInGame[playersInGame.length-1];
@@ -159,15 +161,15 @@ io.sockets.on(
 								playersInGame[i].prev = playersInGame[i-1];
 							
 							
-                            if(i == 0) {
-                  
-								playersInGame[i].emit('start_game', "Your Turn!", playersInGame.length, i, playersInGame[0].timerSetting, playerNames);
-                  
-                            } else {
-                  
-								playersInGame[i].emit('start_game', playersInGame[0].user_name + "'s Turn.", playersInGame.length, i, playersInGame[0].timerSetting, playerNames);
-                  
-                            } // end if else statement
+              if(i == 0) {
+    
+                playersInGame[i].emit('start_game', "Your Turn!", playersInGame.length, i, playersInGame[0].timerSetting, playerNames);
+    
+              } else {
+    
+                playersInGame[i].emit('start_game', playersInGame[0].user_name + "'s Turn.", playersInGame.length, i, playersInGame[0].timerSetting, playerNames);
+    
+              } // end if else statement
                   
 							for (var j = 0; j<playersInGame.length; j++) {
                   
@@ -214,13 +216,14 @@ io.sockets.on(
 			var boardPosition = getBoardPosition(relativePositionOfMover, client.otherPlayers.length+1);*/
 		  
       
-              if(client.otherPlayers[i] == client.next) {
+        if(client.otherPlayers[i] == client.next) {
               
-				client.otherPlayers[i].emit('move', startX, startY, endX, endY, "Your Turn!");
+				  client.otherPlayers[i].emit('move', startX, startY, endX, endY, "Your Turn!");
               
-              } else {
+        } else {
               
-				client.otherPlayers[i].emit('move', startX, startY, endX, endY, client.next.user_name + "'s Turn.");
+				  client.otherPlayers[i].emit('move', startX, startY, endX, endY, client.next.user_name + "'s Turn.");
+        }
 		}
     client.emit('you_moved', client.next.user_name + "'s Turn.");
     });
@@ -257,9 +260,9 @@ io.sockets.on(
       previousClient.next = client.next;
       client.next.prev = previousClient;
       //io.sockets.emit('chat', {user_name: 'debug', msg: "Previous: " + previousClient.user_name + " Next: " + client.next + " Previous.Next: " + previousClient.next});
-      client.emit('dropped', player);
+      client.emit('dropped', player, client.myTurnOrder);
 		for(var i = 0; i<client.otherPlayers.length; i++) {
-			client.otherPlayers[i].emit('dropped', player);
+			client.otherPlayers[i].emit('dropped', player, client.myTurnOrder);
 		}
   });
 });
