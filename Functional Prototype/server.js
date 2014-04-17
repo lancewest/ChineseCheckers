@@ -115,7 +115,7 @@ io.sockets.on(
 	function(client) {
               
 		// Send a welcome message first.
-		client.emit('welcome', 'Welcome to Chinese Checkers!');
+		client.emit('welcome', 'Chinese Checkers');
 
 		// Listen to an event called 'login'. The client should emit this event when
 		// it wants to log in to the chat room.

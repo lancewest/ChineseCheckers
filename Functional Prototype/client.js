@@ -11,7 +11,7 @@
 	var myMarbles = [];     // contains your game pieces
 	var moveingFrom = [];
 	var myTurn = true;
-	var turnTracker = new createjs.Text("Your Turn!", "20px Arial", "#ff7700");
+	var turnTracker = new createjs.Text("Your Turn!", "28px Jing Jing", "#330000");
 	var timersManager = [];
   var gameOver = false;
 	
@@ -32,7 +32,7 @@
 	var purpleMarbleImage; 
 		
 	var playerIdentifier = "unassigned";
-  var numberOfPlayers;
+    var numberOfPlayers;
 	
 // $(document) returns a jQuery object representing the whole document (page).
 // $(document).ready(fn) tells jQuery to call function 'fn' after the whole
@@ -104,9 +104,9 @@ $(document).ready(function() {
       timersManager.timers[i].isMe = i == myTurnOrder;
 			
 			var timeInMinutes = Math.floor(defaultTime/60) +":0" + defaultTime%60;
-			timersManager.timers[i].textElement = new createjs.Text(playerNames[i] + " - " + timeInMinutes, "22px Arial", "#ff7700");
+			timersManager.timers[i].textElement = new createjs.Text(playerNames[i] + " - " + timeInMinutes, "30px Jing Jing", "#330000");
 			timersManager.timers[i].textElement.x = 650;
-			timersManager.timers[i].textElement.y = 25*i + 25;
+			timersManager.timers[i].textElement.y = 30*i + 25;
 			
 			timersManager.timers[i].isNewTurn = timersManager.countDown;
 			timersManager.timers[i].time = defaultTime;

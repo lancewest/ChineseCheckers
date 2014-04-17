@@ -1,19 +1,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
-<!-- This section below lays out the format of everything. 
+<!-- This section below lays out the format of everything.  background: #282828;
 		To add buttons or text, first you need to add something here to the appropriate section: -->
 <style>
 body {
   font-family: sans-serif;
-  background: white;
+  background: url('background.jpg') no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  zIndex: -1; 
 }
 
 #status {
-  font-size: 14pt;
-  color: gray;
-  margin-top: 12px;
-  margin-bottom: 12px;
+  font-size: 50pt;
+  color: #FE2E2E;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-family: Jing Jing; 
 }
 
 #board {
@@ -37,9 +43,30 @@ body {
   width: 50px;
 }
 
-#login_section, #chat_section, #game_section, #waiting_section {
+#login_section, #waiting_section {
   display: none;
+   position: fixed;
+   color: black; 
+   top: 40%;
+   left: 46%;
 }
+
+#chat_section  {
+
+display: none; 
+
+} 
+
+#game_section { 
+
+display: none;
+ background: url('game.jpg') no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+
+} 
 
 .user_name {
   font-size: 10pt;
@@ -87,12 +114,15 @@ body {
 #link {
 	position: absolute;
 	right: 10px;
-	bottom: 190px;
+	bottom: 190px
 }
 
-#opponent {
-  height: 500%;
-}
+#music { 
+
+bottom: 0; 
+left: 0;
+
+} 
 
 </style>
 
@@ -101,11 +131,11 @@ body {
 
 <div id="parent">
 <div id="login_section">
-	<div id="status">Connecting to the chat room ...</div>
+	<div id="status" style="position:relative; right:190px;">Connecting to the chat room ...</div>
 	Your name:
 	<input id="name" type="text"></input>
 	
-	<div>
+	<div> 
 		Timer Settings:
 		<select id="timerOptions">
 			<option value="1">Random</option>
@@ -128,6 +158,7 @@ body {
 	How to Play:
 	<!--<input id="instructions_capture" type="button" value="Capture" disabled="true"></input>-->
 	<input id="instructions_standard" type="button" value="Standard" disabled="true"></input>
+
 </div>
 
 <div id="chat_section">
@@ -143,6 +174,13 @@ body {
 		<a id="link" href="InstructionsPopUp.html" target="_blank" 
 			onclick="window.open(this.href,this.target,'width=300,height=300');
 			return false;">How To Play</a>
+	<div id="music">
+		<audio loop="loop" autoplay="autoplay" controls="controls">
+		<source src="assets/DST-Destiny.ogg" type="audio/ogg">
+        <source src="assets/DST-Destiny.mp3" type="audio/mpeg">
+        <p>Your browser does not support the audio element.</p>
+		</audio>
+	</div>
 </div>
 
 <div id="waiting_section" align="center" >
@@ -243,12 +281,14 @@ body {
 	<script type="text/javascript" src="./src/tweenjs/Ease.js"></script>
 	<script type="text/javascript" src="./src/tweenjs/MotionGuidePlugin.js"></script>
     
-	<!--<script type="text/javascript" src="./client.js"></script>-->
+	<script type="text/javascript" src="./client.js"></script>
+<!--
   <script type="text/javascript" src="./clientDoc.js"></script>
   <script type="text/javascript" src="./initialization.js"></script>
   <script type="text/javascript" src="./graphics.js"></script>
   <script type="text/javascript" src="./gameLogic.js"></script>
   <script type="text/javascript" src="./imageLoading.js"></script>
+--> 
     
 </head>
 
@@ -257,11 +297,5 @@ body {
 	<div id="loader"></div>
 	
 </body>
-
-<audio controls loop autoplay>
-    <source src="assets/DST-Destiny.ogg" type="audio/ogg">
-        <source src="assets/DST-Destiny.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-</audio>
 
 </html>
