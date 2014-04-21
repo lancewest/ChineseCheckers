@@ -89,7 +89,7 @@ $(document).ready(function() {
 		timersManager.timers = new Array(numPlayers);
 		timersManager.turnIndex = 0;
 		
-		if(timerOption == 2 || timerOption == 1)
+		if(timerOption == 2)
 			timersManager.countDown = true;
 		else
 			timersManager.countDown = false;
@@ -230,8 +230,7 @@ $(document).ready(function() {
           var div = $('<div></div>');
           // Similarly, create span elements with CSS classes and corresponding
           // contents, and append them in a row to the new div element.
-          div.append($('<span></span>').addClass('user_name').text(user_name));
-          div.append($('<span></span>').addClass('says').text(' says: '));
+          div.append($('<span></span>').addClass('user_name').text(user_name + ': '));
           div.append($('<span></span>').addClass('msg').text(msg));
           // Add the new div element to the chat board.
           $('#board').append(div);
@@ -303,16 +302,21 @@ $(document).ready(function() {
     
     $('#surrender').click(function() {
         $('#warning').css('display', 'none');
-	      $('#game_section').css('display', 'none');
-	      $('#waiting_section').css('display', 'none');
+	    $('#game_section').css('display', 'none');
+	    $('#waiting_section').css('display', 'none');
         $('#chat_section').css('display', 'none');
         $('#login_section').css('display', 'block');
         
-        
-        socket.emit('move', 0, 0, 0, 0);
+        if(myTurn)
+			socket.emit('move', 0, 0, 0, 0);
+			
         socket.emit('dropped', playerIdentifier);
         
         location.reload(true);
+    });
+	
+	$('#howToPlay').click(function() {
+		window.open('InstructionsPopUp.html', this.target, 'width=1000, height=400');
     });
     
     $('#msg').keyup(function(event) {
@@ -335,6 +339,7 @@ $(document).ready(function() {
 		 $('#login_section').css('display', 'none');
 		 $('#instructions_standard_section').css('display', 'block');
 		 $('#backtologin_standard').attr('disabled', false);
+		 window.scrollBy(0,965);
 	}); // end #instructions_standard
 	
 	// If the instructions for capture is clicked then display the rules and instructions
@@ -385,12 +390,12 @@ $(document).ready(function() {
       }
     }
 		
-		var seconds = Math.round(timerToChange.time%60) < 10 ? "0" + Math.round(timerToChange.time%60) : Math.round(timerToChange.time%60);
+		var seconds = Math.floor(timerToChange.time%60) < 10 ? "0" + Math.floor(timerToChange.time%60) : Math.floor(timerToChange.time%60);
 		var timeInMinutes = Math.floor(timerToChange.time/60) +":" + seconds;
     
 		if(timerToChange.isNewTurn && !timerToChange.firstTurn) {
       timerToChange.time += 15;
-			timeInMinutes = Math.floor(timerToChange.time/60) +":" + Math.round(timerToChange.time%60) + "   +15 sec";
+			timeInMinutes = Math.floor(timerToChange.time/60) +":" + Math.floor(timerToChange.time%60) + "   +15 sec";
 		}
 		timerToChange.isNewTurn = false;
     timerToChange.firstTurn = false;
@@ -415,6 +420,10 @@ $(document).ready(function() {
 
 		//check to see if we are running in a browser with touch support
 		stage = new createjs.Stage(canvas);
+		
+		//Set up background board outline
+		var backgroundOutline = new createjs.Bitmap("assets/BoardOutline7.png");
+		stage.addChild(backgroundOutline);
 
 		// enable touch interactions if supported on the current device:
 		createjs.Touch.enable(stage);
@@ -1023,7 +1032,8 @@ $(document).ready(function() {
 		spotContainer.addChild(turnTracker);
 			
 		var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
-
+		
+		
 		// create and are position the grey spots
 		for(var y = 0; y < 17; y++){
             

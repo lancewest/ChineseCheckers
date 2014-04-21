@@ -1,7 +1,7 @@
 //Server For Team 3's Chinese Checkers Project
 var express = require("express");
 var app = express();
-var port = 22225;
+var port = 22227;
 
 //This Matrix holds all the players waiting to get into a game. The players are sorted into the Matrix by the number of players 
 // that they want to be in a game with. If they are looking for Any, then they are in the first row, if they are looking for 2 
@@ -66,7 +66,7 @@ function findPlayersForGame() {
 		
 		if(timedPlayers && timedPlayers.length >= numPlayers && timedPlayers.length != 1)
 			return timedPlayers;
-		else if(notTimedPlayers && notTimedPlayers.length >= numPlayers && timedPlayers.length != 1)
+		else if(notTimedPlayers && notTimedPlayers.length >= numPlayers && notTimedPlayers.length != 1)
 			return notTimedPlayers;
         
 	} // end for loop numPlayers
