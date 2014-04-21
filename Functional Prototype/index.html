@@ -27,7 +27,13 @@ body {
   height: 150px;
   border: 1px solid gray;
   padding: 3px;
-  background: #282828;
+  background: url('paper.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  overflow: auto;
+  background-attachment: fixed;
 }
 
 #board div {
@@ -51,21 +57,14 @@ body {
    left: 46%;
 }
 
-#chat_section  {
-
-display: none; 
-
-} 
-
 #game_section { 
 
 display: none;
- background: url('game.jpg') no-repeat center center fixed; 
+ background: url('game.jpg') no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-
 } 
 
 .user_name {
@@ -80,6 +79,7 @@ display: none;
 }
 
 #chat_section {
+    display: none;
   position: absolute;
   left:10px;
   bottom:100px;
@@ -242,7 +242,7 @@ left: 0;
 </div>-->
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Chinese Checkers</title>
 
 	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />

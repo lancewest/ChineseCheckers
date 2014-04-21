@@ -235,6 +235,10 @@ $(document).ready(function() {
           div.append($('<span></span>').addClass('msg').text(msg));
           // Add the new div element to the chat board.
           $('#board').append(div);
+          var divide = document.getElementById('board');
+          divide.scrollTop = divide.scrollHeight;
+          div.css("background-image","url('paper.jpg')");
+          $('#board').css("background-image","url('papaer.jpg')");
           update = true;
         //}
       });
