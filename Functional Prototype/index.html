@@ -3,140 +3,18 @@
 
 <!-- This section below lays out the format of everything.  background: #282828;
 		To add buttons or text, first you need to add something here to the appropriate section: -->
-<style>
-body {
-  font-family: sans-serif;
-  background: url('background.jpg') no-repeat center center fixed; 
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  zIndex: -1; 
-}
-
-#status {
-  font-size: 50pt;
-  color: #FE2E2E;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-family: Jing Jing; 
-}
-
-#board {
-  width: 360px;
-  height: 150px;
-  border: 1px solid gray;
-  padding: 3px;
-  background: #282828;
-}
-
-#board div {
-  margin-top: 5px;
-}
-
-#msg {
-  width: 300px;
-  margin-right: 10px;
-}
-
-#send {
-  width: 50px;
-}
-
-#login_section, #waiting_section {
-  display: none;
-   position: fixed;
-   color: black; 
-   top: 40%;
-   left: 46%;
-}
-
-#chat_section  {
-
-display: none; 
-
-} 
-
-#game_section { 
-
-display: none;
- background: url('game.jpg') no-repeat center center fixed; 
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-
-} 
-
-.user_name {
-  font-size: 10pt;
-  font-weight: bold;
-  color: blue;
-}
-
-.testCanvas {
-  width: 960;
-  height: 800;
-}
-
-#chat_section {
-  position: absolute;
-  left:10px;
-  bottom:100px;
-}
-  
-.says {
-  font-size: 10pt;
-  color: gray;
-}
-
-.msg {
-  font-size: 12pt;
-  font-family: serif;
-}
-
-.notification {
-  color: green;
-}
-
-#surrender {
-  position: absolute;
-  right:10px;
-  bottom:100px;
-}
-
-#parent {
-  position: relative;
-  height: 1000px;
-}
-
-
-#link {
-	position: absolute;
-	right: 10px;
-	bottom: 190px
-}
-
-#music { 
-
-bottom: 0; 
-left: 0;
-
-} 
-
-</style>
-
+<link rel="stylesheet" type="text/css" href="mystyle.css">
 <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <div id="parent">
 <div id="login_section">
 	<div id="status" style="position:relative; right:190px;">Connecting to the chat room ...</div>
-	Your name:
+	<p>Your name:</p>
 	<input id="name" type="text"></input>
 	
 	<div> 
-		Timer Settings:
+		<p>Timer Settings:</p>
 		<select id="timerOptions">
 			<option value="1">Random</option>
 			<option value="2">Timed</option>
@@ -145,17 +23,17 @@ left: 0;
 	</div>
 	
 	<div>
-		# Of Players:
+		<p>Number of Players:</p>
 		<select id="numPlayers">
 			<option value="1">Random</option>
 			<option value="2">2 Players</option>
 			<option value="3">3 Players</option>
 			<option value="4">4 Players</option>
 			<option value="6">6 Players</option>
-		</select>
+		</select><br>
 		<input id="login" type="button" value="Play" disabled="true"></input>
 	</div>
-	How to Play:
+	<p>How to Play:</p>
 	<!--<input id="instructions_capture" type="button" value="Capture" disabled="true"></input>-->
 	<input id="instructions_standard" type="button" value="Standard" disabled="true"></input>
 
@@ -166,6 +44,7 @@ left: 0;
   </div>
   <input id="msg" type="text"></input>
   <input id="send" type="button" value="Send"></input>
+  <input id="hide" type="button" value="Hide" onClick="hideTheChat()"></input>
 </div>
 
 <div id="game_section" align="center" class="canvasHolder" >
@@ -275,20 +154,20 @@ left: 0;
 	<script type="text/javascript" src="./src/easeljs/ui/Touch.js"></script>
 	<script type="text/javascript" src="./src/easeljs/utils/SpriteSheetUtils.js"></script>
 	<script type="text/javascript" src="./src/easeljs/utils/SpriteSheetBuilder.js"></script>
-    <script type="text/javascript" src="./src/createjs/events/Event.js"></script>
+  <script type="text/javascript" src="./src/createjs/events/Event.js"></script>
 	<script type="text/javascript" src="./src/createjs/events/EventDispatcher.js"></script>
 	<script type="text/javascript" src="./src/tweenjs/Tween.js"></script>
 	<script type="text/javascript" src="./src/tweenjs/Ease.js"></script>
 	<script type="text/javascript" src="./src/tweenjs/MotionGuidePlugin.js"></script>
     
-	<script type="text/javascript" src="./client.js"></script>
-<!--
+	<!--<script type="text/javascript" src="./client.js"></script>--> 
+
   <script type="text/javascript" src="./clientDoc.js"></script>
   <script type="text/javascript" src="./initialization.js"></script>
   <script type="text/javascript" src="./graphics.js"></script>
   <script type="text/javascript" src="./gameLogic.js"></script>
   <script type="text/javascript" src="./imageLoading.js"></script>
---> 
+
     
 </head>
 
