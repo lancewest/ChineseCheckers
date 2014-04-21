@@ -13,7 +13,7 @@
 	var myTurn = true;
 	var turnTracker = new createjs.Text("Your Turn!", "28px Jing Jing", "#330000");
 	var timersManager = [];
-  var gameOver = false;
+	var gameOver = false;
 	
 	var spotsInitialized = false;
 	var playersInitialized = 0;
@@ -89,7 +89,7 @@ $(document).ready(function() {
 		timersManager.timers = new Array(numPlayers);
 		timersManager.turnIndex = 0;
 		
-		if(timerOption == 2 || timerOption == 1)
+		if(timerOption == 2)
 			timersManager.countDown = true;
 		else
 			timersManager.countDown = false;
@@ -160,13 +160,34 @@ $(document).ready(function() {
 			  var startSpot = spotMatrix[startY][startX];
 			  var endSpot = spotMatrix[endY][endX];
 			
-			  startSpot.isEmpty = true;
-			  endSpot.isEmpty = false;
+			  
 			
 			var marble = findClosestOpponentMarble(startSpot.screenX, startSpot.screenY);
 			marble.parent.addChild(marble);
+			stage.addChild(marble);
 			marble.offset = {x:marble.x, y:marble.y};
-            var tween = createjs.Tween.get(marble).to({ "x": endSpot.screenX, "y": endSpot.screenY }, 1000);
+			
+			
+			var distance = Math.sqrt(((startSpot.screenX - endSpot.screenX)*(startSpot.screenX - endSpot.screenX)) + 
+							((startSpot.screenY - endSpot.screenY)*(startSpot.screenY - endSpot.screenY)));
+			
+			//If not a jump move no need to find path
+			if(distance < 60) {
+				var tween = createjs.Tween.get(marble).to({ "x": endSpot.screenX, "y": endSpot.screenY }, 750);
+			}
+			else {
+				var spotsVisited = new Array();
+				getSpotsVistited(startSpot, endSpot, spotsVisited, 0);
+				
+				var tween = createjs.Tween.get(marble);
+				
+				for(var i = spotsVisited.length-2; i>=0; i--)
+					tween.to({ "x": spotsVisited[i].screenX, "y": spotsVisited[i].screenY }, 600);
+
+			}
+			
+			startSpot.isEmpty = true;
+			endSpot.isEmpty = false;
               
 			timersManager.turnIndex++;
 			if(timersManager.turnIndex >= timersManager.timers.length)
@@ -230,11 +251,14 @@ $(document).ready(function() {
           var div = $('<div></div>');
           // Similarly, create span elements with CSS classes and corresponding
           // contents, and append them in a row to the new div element.
-          div.append($('<span></span>').addClass('user_name').text(user_name));
-          div.append($('<span></span>').addClass('says').text(' says: '));
+          div.append($('<span></span>').addClass('user_name').text(user_name + ': '));
           div.append($('<span></span>').addClass('msg').text(msg));
           // Add the new div element to the chat board.
           $('#board').append(div);
+          var divide = document.getElementById('board');
+          divide.scrollTop = divide.scrollHeight;
+          div.css("background-image","url('paper.jpg')");
+          $('#board').css("background-image","url('papaer.jpg')");
           update = true;
         //}
       });
@@ -299,16 +323,21 @@ $(document).ready(function() {
     
     $('#surrender').click(function() {
         $('#warning').css('display', 'none');
-	      $('#game_section').css('display', 'none');
-	      $('#waiting_section').css('display', 'none');
+	    $('#game_section').css('display', 'none');
+	    $('#waiting_section').css('display', 'none');
         $('#chat_section').css('display', 'none');
         $('#login_section').css('display', 'block');
         
-        
-        socket.emit('move', 0, 0, 0, 0);
+        if(myTurn)
+			socket.emit('move', 0, 0, 0, 0);
+			
         socket.emit('dropped', playerIdentifier);
         
         location.reload(true);
+    });
+	
+	$('#howToPlay').click(function() {
+		window.open('InstructionsPopUp.html', this.target, 'width=1000, height=400');
     });
     
     $('#msg').keyup(function(event) {
@@ -331,6 +360,7 @@ $(document).ready(function() {
 		 $('#login_section').css('display', 'none');
 		 $('#instructions_standard_section').css('display', 'block');
 		 $('#backtologin_standard').attr('disabled', false);
+		 window.scrollBy(0,965);
 	}); // end #instructions_standard
 	
 	// If the instructions for capture is clicked then display the rules and instructions
@@ -381,12 +411,12 @@ $(document).ready(function() {
       }
     }
 		
-		var seconds = Math.round(timerToChange.time%60) < 10 ? "0" + Math.round(timerToChange.time%60) : Math.round(timerToChange.time%60);
+		var seconds = Math.floor(timerToChange.time%60) < 10 ? "0" + Math.floor(timerToChange.time%60) : Math.floor(timerToChange.time%60);
 		var timeInMinutes = Math.floor(timerToChange.time/60) +":" + seconds;
     
 		if(timerToChange.isNewTurn && !timerToChange.firstTurn) {
       timerToChange.time += 15;
-			timeInMinutes = Math.floor(timerToChange.time/60) +":" + Math.round(timerToChange.time%60) + "   +15 sec";
+			timeInMinutes = Math.floor(timerToChange.time/60) +":" + Math.floor(timerToChange.time%60) + "   +15 sec";
 		}
 		timerToChange.isNewTurn = false;
     timerToChange.firstTurn = false;
@@ -411,6 +441,10 @@ $(document).ready(function() {
 
 		//check to see if we are running in a browser with touch support
 		stage = new createjs.Stage(canvas);
+		
+		//Set up background board outline
+		var backgroundOutline = new createjs.Bitmap("assets/BoardOutline5.png");
+		stage.addChild(backgroundOutline);
 
 		// enable touch interactions if supported on the current device:
 		createjs.Touch.enable(stage);
@@ -667,6 +701,90 @@ $(document).ready(function() {
 		return closest;
         
 	} // end function findClosestSpot(screenX, screenY)
+	
+	//Takes starting and end spot and returns a list of the path the marble took in order
+	function getSpotsVistited(startSpot, endSpot, spotsVisited, depth) {
+		//Check to see if this is a wild goose chase path
+		depth++;
+		if(depth > 5)
+			return false;
+	
+		//If we have allready visited this spot, return false to prevent looping
+		for(var i = 0; i<spotsVisited.length; i++) {
+			if(spotsVisited[i] == startSpot) {
+				return false;
+			}
+		}
+	
+		//If this is the end spot, add it and return true
+		if(startSpot.x == endSpot.x && startSpot.y == endSpot.y) {
+			spotsVisited.push(startSpot)
+			return true;
+		}
+
+		//If one of the jump neighbours is the next step towards the finish, add and return true
+		if(startSpot.northeast != null 
+			&& !startSpot.northeast.isEmpty 
+			&& startSpot.northeast.northeast != null 
+			&& startSpot.northeast.northeast.isEmpty) {
+				if(getSpotsVistited(startSpot.northeast.northeast, endSpot, spotsVisited, depth)) {
+					spotsVisited.push(startSpot);
+					return true;
+				}
+		} // end if statement
+        
+		if(startSpot.east != null 
+			&& !startSpot.east.isEmpty 
+			&& startSpot.east.east != null 
+			&& startSpot.east.east.isEmpty) {
+				if(getSpotsVistited(startSpot.east.east, endSpot, spotsVisited, depth)) {
+					spotsVisited.push(startSpot);
+					return true;
+				}
+		} // end if statement
+        
+		if(startSpot.southeast != null 
+			&& !startSpot.southeast.isEmpty 
+			&& startSpot.southeast.southeast != null 
+			&& startSpot.southeast.southeast.isEmpty) {
+				if(getSpotsVistited(startSpot.southeast.southeast, endSpot, spotsVisited, depth)) {
+					spotsVisited.push(startSpot);
+					return true;
+				}
+		} // end if statement
+        
+		if(startSpot.southwest != null 
+			&& !startSpot.southwest.isEmpty 
+			&& startSpot.southwest.southwest != null 
+			&& startSpot.southwest.southwest.isEmpty) {
+				if(getSpotsVistited(startSpot.southwest.southwest, endSpot, spotsVisited, depth)) {
+					spotsVisited.push(startSpot);
+					return true;
+				}
+		} // end if statement
+        
+		if(startSpot.west != null 
+			&& !startSpot.west.isEmpty 
+			&& startSpot.west.west != null 
+			&& startSpot.west.west.isEmpty) {
+				if(getSpotsVistited(startSpot.west.west, endSpot, spotsVisited, depth)) {
+					spotsVisited.push(startSpot);
+					return true;
+				}
+		} // end if statement
+        
+		if(startSpot.northwest != null 
+			&& !startSpot.northwest.isEmpty 
+			&& startSpot.northwest.northwest != null 
+			&& startSpot.northwest.northwest.isEmpty) {
+				if(getSpotsVistited(startSpot.northwest.northwest, endSpot, spotsVisited, depth)) {
+					spotsVisited.push(startSpot);
+					return true;
+				}
+		} // end if statement
+		
+		return false;
+	}
 	
 	//Takes a start spot and recursively finds all possible move locations
 	function getValidMoves(possible, startSpot, cameFrom) {
@@ -1019,7 +1137,8 @@ $(document).ready(function() {
 		spotContainer.addChild(turnTracker);
 			
 		var spotsPerLine = [1,2,3,4,13,12,11,10,9,10,11,12,13,4,3,2,1];
-
+		
+		
 		// create and are position the grey spots
 		for(var y = 0; y < 17; y++){
             
@@ -1151,8 +1270,6 @@ $(document).ready(function() {
 					var o = evt.target;
 					o.scaleX = o.scaleY = 0.65;
 					o.parent.addChild(o);
-					console.debug("evt.stageX:" + evt.stageX);
-					console.debug("evt.stageY:" + evt.stageY);
 					o.offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
 					
 					moveingFrom.screenX = o.x;
@@ -1231,6 +1348,7 @@ $(document).ready(function() {
                                     
 					evt.preventDefault();
 					var o = evt.target;
+					stage.addChild(o);
 					o.x = evt.stageX+ o.offset.x;
 					o.y = evt.stageY+ o.offset.y;
 					update = true;

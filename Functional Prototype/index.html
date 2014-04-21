@@ -35,7 +35,7 @@
 	</div>
 	<p>How to Play:</p>
 	<!--<input id="instructions_capture" type="button" value="Capture" disabled="true"></input>-->
-	<input id="instructions_standard" type="button" value="Standard" disabled="true"></input>
+	<input id="instructions_standard" type="button" value="How To Play" disabled="true"></input>
 
 </div>
 
@@ -49,10 +49,8 @@
 
 <div id="game_section" align="center" class="canvasHolder" >
 		<canvas id="testCanvas" width="1000" height ="1000" text="Your Turn"></canvas>
-    <input id="surrender" type="button" value="Surrender"></input>
-		<a id="link" href="InstructionsPopUp.html" target="_blank" 
-			onclick="window.open(this.href,this.target,'width=300,height=300');
-			return false;">How To Play</a>
+		<input id="howToPlay" type="button" value="HowToPlay"></input>
+		<input id="surrender" type="button" value="Surrender"></input>
 	<div id="music">
 		<audio loop="loop" autoplay="autoplay" controls="controls">
 		<source src="assets/DST-Destiny.ogg" type="audio/ogg">
@@ -67,9 +65,9 @@
 </div>
 </div>
 
-<div id="instructions_standard_section" align="center" >
-	<span style="color: white;">
-	<P style="font-size:45px"> <B> <U> STANDARD GAME </P> </B> </U>
+<div id="instructions_standard_section" align="center" style="background-color: #F0E68C;">
+	<span style="color: black;">
+	<P style="font-size:45px"> <B> <U> Chinese Checkers </P> </B> </U>
 	<span style="font-size:22px">
 	<P> <B> <U>	How to Move: </B> </U> 	Click a marble and drag it to your desired spot.
 				Once you release the marble your move is finished. 
@@ -86,10 +84,10 @@
 	</span>
 	</span>
 	<div>
-	<img src='/assets/ChainJumpEx.png' width='500' height='400' alt='Chain Jump Example' />
+	<img src='/assets/ChainJumpEx.png' width='400' height='315' alt='Chain Jump Example' />
 	</div>
 	<div>
-	<img src='/assets/Non-jumpsEx.png' width='500' height='400' alt='Non-Jump example' />
+	<img src='/assets/Non-jumpsEx.png' width='400' height='315' alt='Non-Jump example' />
 	</div>
 	<input id="backtologin_standard" type="button" value="Back" disabled="true"></input>
 </div>
@@ -121,7 +119,7 @@
 </div>-->
 
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+   	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Chinese Checkers</title>
 
 	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />

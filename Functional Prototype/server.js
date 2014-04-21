@@ -66,7 +66,7 @@ function findPlayersForGame() {
 		
 		if(timedPlayers && timedPlayers.length >= numPlayers && timedPlayers.length != 1)
 			return timedPlayers;
-		else if(notTimedPlayers && notTimedPlayers.length >= numPlayers && timedPlayers.length != 1)
+		else if(notTimedPlayers && notTimedPlayers.length >= numPlayers && notTimedPlayers.length != 1)
 			return notTimedPlayers;
         
 	} // end for loop numPlayers
