@@ -237,7 +237,7 @@ $(document).ready(function() {
       function(winner) {
 			update = true;
 			gameOver = true;
-			turnTracker.text = "Game Over! You Lose! " + winner + " wins!";
+			turnTracker.text = "You Lose! \n" + winner + " wins!";
 			myTurn = false;
         }); // end socket.on for win
 
@@ -1515,3 +1515,39 @@ $(document).ready(function() {
 		e.preventDefault();
                               
 	}, false); // end event listener for context menu
+  
+  var hide = true;
+  function hideTheChat() {
+    if(hide) {
+      document.getElementById("chat_section").style.webkitAnimationName = "";
+      document.getElementById("chat_section").style.webkitAnimationName = "hideChat";
+      document.getElementById("chat_section").style.left = "-365px";
+      document.getElementById("hide").value = "Show";
+      hide = false;
+    }
+    
+    else {
+      document.getElementById("chat_section").style.webkitAnimationName = "";
+      document.getElementById("chat_section").style.webkitAnimationName = 'unhideChat';
+      document.getElementById("chat_section").style.left = "10px";
+      document.getElementById("hide").value = "Hide";
+      hide = true;
+    }
+  }
+  
+  var playingSound = true;
+  function playButton() {
+    if(playingSound) {
+      document.getElementById('music_player').pause();
+      document.getElementById("music_button").value = "Play";
+      playingSound = false;
+    }
+    
+    else {
+      document.getElementById('music_player').play();
+      document.getElementById("music_button").value = "Pause";
+      playingSound = true;
+    }
+  }
+  
+  

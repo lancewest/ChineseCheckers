@@ -254,6 +254,7 @@ body {
   padding: 3px;
   background-color: rgba(92,51,23,0.5);
   border: 0px;
+  overflow : auto;
 }
 
 #board div {
@@ -347,14 +348,43 @@ body {
   -webkit-animation-direction: normal;
 }
 
+#music_button {
+  width: 50px;
+  position: absolute;
+	right: 10px;
+	bottom: 150px;
+
+	font-family: korean_calligraphyregular;
+	font-size: 18px;
+	color: #000;
+	text-decoration: none;
+	font-weight: normal;
+	padding: 3px;
+	
+  background-color: rgba(92,51,23,0.5);
+  border: 0px;
+  
+  animation-name: fadeInLeft;
+  animation-duration: 1.5s;
+  animation-iteration-count: 1;
+  animation-direction: normal;
+  
+  -webkit-animation-name: fadeInLeft;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-direction: normal;
+}
+
+#music_player {
+  display: none;
+}
+
 #link:hover {
   background-color: rgba(92,51,23,1);
   color: #fff;
 }
 
-#music { 
-
-bottom: 0; 
-left: 0;
-
-} 
+#music_button:hover {
+  background-color: rgba(92,51,23,1);
+  color: #fff;
+}
