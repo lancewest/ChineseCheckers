@@ -34,6 +34,15 @@
 	var playerIdentifier = "unassigned";
     var numberOfPlayers;
 	
+	//sound
+	var audioElement = document.createElement('audio');
+	audioElement.setAttribute('src', 'assets/moveSound.wav');
+	audioElement.setAttribute('preload', 'auto');
+	audioElement.load();
+	
+	//Display Marbles
+	var displayMarbles = [ ];
+	
 // $(document) returns a jQuery object representing the whole document (page).
 // $(document).ready(fn) tells jQuery to call function 'fn' after the whole
 // document is loaded.
@@ -123,7 +132,7 @@ $(document).ready(function() {
 		
 		//Initialize turnTracker
 		if(turn == "Your Turn!") {
-              
+			socket.emit('showColor', playerIdentifier);
 			turnTracker.text = "Your Turn!";
 			myTurn = true;
 			update = true;
@@ -149,7 +158,7 @@ $(document).ready(function() {
 	// If server tells us that the other player moves do this:
     socket.on(
 		'move',
-		function(startX, startY, endX, endY, turn) {
+		function(startX, startY, endX, endY, turn, currentColor) {
 			/*var convertedStartSpot = convertSpot(startX, startY, boardPosition);
 			var convertedEndSpot = convertSpot(endX, endY, boardPosition);*/
 			
@@ -174,6 +183,7 @@ $(document).ready(function() {
 			//If not a jump move no need to find path
 			if(distance < 60) {
 				var tween = createjs.Tween.get(marble).to({ "x": endSpot.screenX, "y": endSpot.screenY }, 750);
+				tween.call(function() { audioElement.play(); });
 			}
 			else {
 				var spotsVisited = new Array();
@@ -182,8 +192,7 @@ $(document).ready(function() {
 				var tween = createjs.Tween.get(marble);
 				
 				for(var i = spotsVisited.length-2; i>=0; i--)
-					tween.to({ "x": spotsVisited[i].screenX, "y": spotsVisited[i].screenY }, 600);
-
+					tween.to({ "x": spotsVisited[i].screenX, "y": spotsVisited[i].screenY }, 600).call(function() { audioElement.play(); });
 			}
 			
 			startSpot.isEmpty = true;
@@ -198,7 +207,7 @@ $(document).ready(function() {
 			}
       
 			if(turn == "Your Turn!") {
-              
+				socket.emit('showColor', playerIdentifier);
 				turnTracker.text = "Your Turn!";
 				myTurn = true;
 				update = true;
@@ -215,7 +224,7 @@ $(document).ready(function() {
 	// If server responds to our move, update turn status
     socket.on(
 		'you_moved',
-		function(turn) {
+		function(turn, currentColor) {
 			turnTracker.text = turn;
 			myTurn = false;
 			update = true;
@@ -225,7 +234,8 @@ $(document).ready(function() {
     socket.on(
 		'you_win',
 		function(turn) {
-      gameOver = true;
+			socket.emit('showColor', playerIdentifier);
+			gameOver = true;
 			turnTracker.text = "You Win!";
 			myTurn = false;
 			update = true;
@@ -234,7 +244,7 @@ $(document).ready(function() {
 	// If server tells us that the other player has won:
     socket.on(
       'win',
-      function(winner) {
+      function(winner, winColor) {
 			update = true;
 			gameOver = true;
 			turnTracker.text = "You Lose! \n" + winner + " wins!";
@@ -258,11 +268,40 @@ $(document).ready(function() {
           var divide = document.getElementById('board');
           divide.scrollTop = divide.scrollHeight;
           div.css("background-image","url('paper.jpg')");
-          $('#board').css("background-image","url('papaer.jpg')");
+          $('#board').css("background-image","url('paper.jpg')");
           update = true;
         //}
       });
       
+	 socket.on(
+      'showColor',
+      function(color) {
+			displayMarbles.blue.visible = false;
+			if(displayMarbles.red)
+				displayMarbles.red.visible = false;
+			if(displayMarbles.yellow)
+				displayMarbles.yellow.visible = false;
+			if(displayMarbles.orange)
+				displayMarbles.orange.visible = false;
+			if(displayMarbles.green)
+				displayMarbles.green.visible = false;
+			if(displayMarbles.purple)
+				displayMarbles.purple.visible = false;
+	  
+			if(color == 'blue') 
+				displayMarbles.blue.visible = true;
+			else if(color == 'red')
+				displayMarbles.red.visible = true;
+			else if(color == 'yellow')
+				displayMarbles.yellow.visible = true;
+			else if(color == 'orange')
+				displayMarbles.orange.visible = true;
+			else if(color == 'green')
+				displayMarbles.green.visible = true;
+			else if(color == 'purple')
+				displayMarbles.purple.visible = true;
+      });
+	  
       socket.on(
       'dropped',
       function(player, timerOrder) {
@@ -583,7 +622,7 @@ $(document).ready(function() {
 		
 		if(numPlayers >= 2) {
             
-            handleMyMarbleImageLoad(myBoardPosition);
+            handleMyMarbleImageLoad(myBoardPosition, playerIdentifier);
 			handleOthersMarlbleImageLoad(othersBoardPositions[0]);
             
 		} // end if statement
@@ -1187,7 +1226,7 @@ $(document).ready(function() {
 	} // end function handleSpotImageLoad(event)
 	
 	//This function is run when the blue marble image is loaded and positions the blue marbles (this players marbles)
-	function handleMyMarbleImageLoad(boardPosition) {
+	function handleMyMarbleImageLoad(boardPosition, color) {
         
 		myMarbles = new Array(10);
 		var image;
@@ -1238,6 +1277,27 @@ $(document).ready(function() {
 			console.debug("Error! Bad Board Position:" + boardPosition);
             
         } // end if else statement
+		
+		//Create Display Marble
+		var displayBitmap = new createjs.Bitmap(image);
+		
+		if(color == 'blue')
+			displayMarbles.blue = displayBitmap;
+		else if(color == 'red')
+			displayMarbles.red = displayBitmap;
+		else if(color == 'green')
+			displayMarbles.green = displayBitmap;
+		else if(color == 'orange')
+			displayMarbles.orange = displayBitmap;
+		else if(color == 'purple')
+			displayMarbles.purple = displayBitmap;
+		else if(color == 'yellow')
+			displayMarbles.yellow = displayBitmap;
+			
+		displayBitmap.x = 50;
+		displayBitmap.y = 65;
+		displayBitmap.scaleX = displayBitmap.scaleY = displayBitmap.scale = 0.55;
+		myMarblesContainer.addChild(displayBitmap);
 		
 		// Create marbles and initial settings/positions
 		for(var i = 0; i < 10; i++) {
@@ -1299,6 +1359,7 @@ $(document).ready(function() {
 							o.y = endSpot.screenY;
 							endSpot.isEmpty = false;
 							startSpot.isEmpty = true;
+							audioElement.play();
 							socket.emit('move', startSpot.x, startSpot.y, endSpot.x, endSpot.y);
 							
 							
@@ -1312,7 +1373,7 @@ $(document).ready(function() {
 							
 							
 							if(hasWon()) {
-                      
+								socket.emit('showColor', playerIdentifier);
 								turnTracker.text = "You Win!"
 								socket.emit('win');
                       
@@ -1402,8 +1463,8 @@ $(document).ready(function() {
         
 		var bitmap;
 		var image;
-    var id;
-    
+		var id;
+	
 		//list of starting positions
 		var xPositions;
 		var yPositions;
@@ -1445,6 +1506,28 @@ $(document).ready(function() {
 			yPositions = [650,650,650,650,600,600,600,550,550,500];
             
 		} // end if else statement
+		
+		//Create Display Marble
+		var displayBitmap = new createjs.Bitmap(image);
+		
+		if(boardPosition == 0)
+			displayMarbles.blue = displayBitmap;
+		else if(boardPosition == 1)
+			displayMarbles.red = displayBitmap;
+		else if(boardPosition == 2)
+			displayMarbles.green = displayBitmap;
+		else if(boardPosition == 3)
+			displayMarbles.yellow = displayBitmap;
+		else if(boardPosition == 4)
+			displayMarbles.orange = displayBitmap;
+		else if(boardPosition == 5)
+			displayMarbles.purple = displayBitmap;
+			
+		displayBitmap.x = 50;
+		displayBitmap.y = 65;
+		displayBitmap.scaleX = displayBitmap.scaleY = displayBitmap.scale = 0.55;
+		othersMarblesContainer.addChild(displayBitmap);
+		
 		
 		for(var i = 0; i < 10; i++){
             
@@ -1549,5 +1632,7 @@ $(document).ready(function() {
       playingSound = true;
     }
   }
+  
+
   
   

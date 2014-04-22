@@ -1,7 +1,7 @@
 //Server For Team 3's Chinese Checkers Project
 var express = require("express");
 var app = express();
-var port = 22230;
+var port = 11112;
 
 //This Matrix holds all the players waiting to get into a game. The players are sorted into the Matrix by the number of players 
 // that they want to be in a game with. If they are looking for Any, then they are in the first row, if they are looking for 2 
@@ -263,6 +263,16 @@ io.sockets.on(
       client.emit('dropped', player, client.myTurnOrder);
 		for(var i = 0; i<client.otherPlayers.length; i++) {
 			client.otherPlayers[i].emit('dropped', player, client.myTurnOrder);
+		}
+  });
+  
+  client.on(
+    'showColor',
+    function(color) {
+		client.emit('showColor', color);
+		
+		for(var i = 0; i<client.otherPlayers.length; i++) {
+			client.otherPlayers[i].emit('showColor', color);
 		}
   });
 });
