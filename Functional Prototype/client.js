@@ -182,17 +182,17 @@ $(document).ready(function() {
 			
 			//If not a jump move no need to find path
 			if(distance < 60) {
-				var tween = createjs.Tween.get(marble).to({ "x": endSpot.screenX, "y": endSpot.screenY }, 750);
+				var tween = createjs.Tween.get(marble).to({ "x": endSpot.screenX, "y": endSpot.screenY }, 750, createjs.Ease.cubicIn);
 				tween.call(function() { audioElement.play(); });
 			}
 			else {
 				var spotsVisited = new Array();
-				getSpotsVistited(startSpot, endSpot, spotsVisited, 0);
+				getSpotsVistited(startSpot, endSpot, spotsVisited, 0, new Array());
 				
 				var tween = createjs.Tween.get(marble);
 				
 				for(var i = spotsVisited.length-2; i>=0; i--)
-					tween.to({ "x": spotsVisited[i].screenX, "y": spotsVisited[i].screenY }, 600).call(function() { audioElement.play(); });
+					tween.to({ "x": spotsVisited[i].screenX, "y": spotsVisited[i].screenY }, 600, createjs.Ease.cubicIn).call(function() { audioElement.play(); });
 			}
 			
 			startSpot.isEmpty = true;
@@ -742,18 +742,21 @@ $(document).ready(function() {
 	} // end function findClosestSpot(screenX, screenY)
 	
 	//Takes starting and end spot and returns a list of the path the marble took in order
-	function getSpotsVistited(startSpot, endSpot, spotsVisited, depth) {
+	function getSpotsVistited(startSpot, endSpot, spotsVisited, depth, checkedList) {
 		//Check to see if this is a wild goose chase path
 		depth++;
-		if(depth > 5)
+		if(depth > 30)
 			return false;
-	
-		//If we have allready visited this spot, return false to prevent looping
-		for(var i = 0; i<spotsVisited.length; i++) {
-			if(spotsVisited[i] == startSpot) {
+		
+		//If we have allready checked this spot, return false to prevent looping
+		for(var i = 0; i<checkedList.length; i++) {
+			if(startSpot.x == checkedList[i].x && startSpot.y == checkedList[i].y) {
+				checkedList.push(startSpot);
 				return false;
 			}
 		}
+		checkedList.push(startSpot);
+		
 	
 		//If this is the end spot, add it and return true
 		if(startSpot.x == endSpot.x && startSpot.y == endSpot.y) {
@@ -766,7 +769,7 @@ $(document).ready(function() {
 			&& !startSpot.northeast.isEmpty 
 			&& startSpot.northeast.northeast != null 
 			&& startSpot.northeast.northeast.isEmpty) {
-				if(getSpotsVistited(startSpot.northeast.northeast, endSpot, spotsVisited, depth)) {
+				if(getSpotsVistited(startSpot.northeast.northeast, endSpot, spotsVisited, depth, checkedList)) {
 					spotsVisited.push(startSpot);
 					return true;
 				}
@@ -776,7 +779,7 @@ $(document).ready(function() {
 			&& !startSpot.east.isEmpty 
 			&& startSpot.east.east != null 
 			&& startSpot.east.east.isEmpty) {
-				if(getSpotsVistited(startSpot.east.east, endSpot, spotsVisited, depth)) {
+				if(getSpotsVistited(startSpot.east.east, endSpot, spotsVisited, depth, checkedList)) {
 					spotsVisited.push(startSpot);
 					return true;
 				}
@@ -786,7 +789,7 @@ $(document).ready(function() {
 			&& !startSpot.southeast.isEmpty 
 			&& startSpot.southeast.southeast != null 
 			&& startSpot.southeast.southeast.isEmpty) {
-				if(getSpotsVistited(startSpot.southeast.southeast, endSpot, spotsVisited, depth)) {
+				if(getSpotsVistited(startSpot.southeast.southeast, endSpot, spotsVisited, depth, checkedList)) {
 					spotsVisited.push(startSpot);
 					return true;
 				}
@@ -796,7 +799,7 @@ $(document).ready(function() {
 			&& !startSpot.southwest.isEmpty 
 			&& startSpot.southwest.southwest != null 
 			&& startSpot.southwest.southwest.isEmpty) {
-				if(getSpotsVistited(startSpot.southwest.southwest, endSpot, spotsVisited, depth)) {
+				if(getSpotsVistited(startSpot.southwest.southwest, endSpot, spotsVisited, depth, checkedList)) {
 					spotsVisited.push(startSpot);
 					return true;
 				}
@@ -806,7 +809,7 @@ $(document).ready(function() {
 			&& !startSpot.west.isEmpty 
 			&& startSpot.west.west != null 
 			&& startSpot.west.west.isEmpty) {
-				if(getSpotsVistited(startSpot.west.west, endSpot, spotsVisited, depth)) {
+				if(getSpotsVistited(startSpot.west.west, endSpot, spotsVisited, depth, checkedList)) {
 					spotsVisited.push(startSpot);
 					return true;
 				}
@@ -816,7 +819,7 @@ $(document).ready(function() {
 			&& !startSpot.northwest.isEmpty 
 			&& startSpot.northwest.northwest != null 
 			&& startSpot.northwest.northwest.isEmpty) {
-				if(getSpotsVistited(startSpot.northwest.northwest, endSpot, spotsVisited, depth)) {
+				if(getSpotsVistited(startSpot.northwest.northwest, endSpot, spotsVisited, depth, checkedList)) {
 					spotsVisited.push(startSpot);
 					return true;
 				}

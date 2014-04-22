@@ -266,6 +266,7 @@ body {
 #msg {
   width: 300px;
   margin-right: 10px;
+  color: white;
 }
 
 #send {
@@ -284,6 +285,7 @@ body {
 .msg {
   font-size: 12pt;
   font-family: serif;
+  color: white;
 }
 
 .notification {

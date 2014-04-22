@@ -10,33 +10,36 @@
 <div id="parent">
 <div id="login_section">
 	<div id="status" style="position:relative; right:190px;">Connecting to the chat room ...</div>
-	<p>Your name:</p>
-	<input id="name" type="text"></input>
+	<p>Your name: <input id="name" type="text"></input></p>
 	
 	<div> 
-		<p>Timer Settings:</p>
-		<select id="timerOptions">
-			<option value="1">Random</option>
-			<option value="2">Timed</option>
-			<option value="3">Not Timed</option>
-		</select>
+		<p>
+			Timer Settings:
+			<select id="timerOptions">
+				<option value="1">Random</option>
+				<option value="2">Timed</option>
+				<option value="3">Not Timed</option>
+			</select>
+		</p>
 	</div>
 	
 	<div>
-		<p>Number of Players:</p>
-		<select id="numPlayers">
-			<option value="1">Random</option>
-			<option value="2">2 Players</option>
-			<option value="3">3 Players</option>
-			<option value="4">4 Players</option>
-			<option value="6">6 Players</option>
-		</select><br>
+		<p>
+			Number of Players:
+			<select id="numPlayers">
+				<option value="1">Random</option>
+				<option value="2">2 Players</option>
+				<option value="3">3 Players</option>
+				<option value="4">4 Players</option>
+				<option value="6">6 Players</option>
+			</select><br>
+		</p>
 		<input id="login" type="button" value="Play" disabled="true"></input>
 	</div>
-	<p>How to Play:</p>
-	<!--<input id="instructions_capture" type="button" value="Capture" disabled="true"></input>-->
-	<input id="instructions_standard" type="button" value="Standard" disabled="true"></input>
-
+	<div style="padding-top:80px;">
+		<!--<input id="instructions_capture" type="button" value="Capture" disabled="true"></input>-->
+		<input id="instructions_standard" type="button" value="How To Play" disabled="true"></input>
+	</div>
 </div>
 
 <div id="chat_section">
