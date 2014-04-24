@@ -143,12 +143,12 @@ body {
 
 @keyframes hideChat {
   0% {
-    opacity: 0;
+    opacity: 1;
     left: 10px;
   }
 
   100% {
-    opacity: 1;
+    opacity: 0;
     left: -365px;
   }
 }
@@ -223,6 +223,9 @@ body {
 }
 
 #chat_section {
+  font-family: korean_calligraphyregular;
+  font-size: 16px;
+
   display: none;
   position: absolute;
   left:10px;
@@ -252,39 +255,59 @@ body {
   width: 360px;
   height: 150px;
   padding: 3px;
-  background-color: rgba(92,51,23,0.5);
   border: 0px;
   overflow : auto;
+  background-image: url('paper.jpg');
+  
+  font-family: korean_calligraphyregular;
+  font-size: 13pt;
 }
 
 #board div {
   margin-top: 5px;
-  background-color: rgba(92,51,23,0.5);
-  border: 0px;
+  background-color: rgba(92,51,23,0);
+  border-right: 0px;
+  border-left: 0px;
+  border-top: 0px;
+  border-bottom-color: #000;
+  border-bottom: 1px;
+  
+  font-family: korean_calligraphyregular;
+  font-size: 13pt;
 }
 
 #msg {
   width: 300px;
   margin-right: 10px;
   color: white;
+  
+  font-family: korean_calligraphyregular;
+  font-size: 13pt;
 }
 
 #send {
   width: 50px;
+  
+  font-family: korean_calligraphyregular;
+  font-size: 13pt;
 }
 
 #hide {
   width: 50px;
+  
+  font-family: korean_calligraphyregular;
+  font-size: 13pt;
 }
   
 .says {
-  font-size: 10pt;
+  font-family: korean_calligraphyregular;
+  font-size: 13px;
   color: gray;
 }
 
 .msg {
-  font-size: 12pt;
-  font-family: serif;
+  font-family: korean_calligraphyregular;
+  font-size: 13pt;
   color: white;
 }
 

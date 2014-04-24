@@ -267,8 +267,8 @@ $(document).ready(function() {
           $('#board').append(div);
           var divide = document.getElementById('board');
           divide.scrollTop = divide.scrollHeight;
-          div.css("background-image","url('paper.jpg')");
-          $('#board').css("background-image","url('paper.jpg')");
+          //div.css("background-image","url('paper.jpg')");
+          //$('#board').css("background-image","url('paper.jpg')");
           update = true;
         //}
       });
@@ -1577,6 +1577,7 @@ $(document).ready(function() {
                                               spotToUnmark.isEmpty = true;
                                             }
                                             othersMarblesContainer.removeChild(elem);
+											stage.removeChild(elem);
                                           }
                                         });
     update = true;
@@ -1636,6 +1637,10 @@ $(document).ready(function() {
     }
   }
   
-
-  
-  
+  window.onbeforeunload = function(e) {
+    if(numberOfPlayers > 0) {
+      if(myTurn)
+        socket.emit('move', 0, 0, 0, 0);
+      socket.emit('dropped', playerIdentifier);
+	}
+  };
